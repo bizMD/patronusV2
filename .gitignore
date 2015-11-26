@@ -73,3 +73,7 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# Upload files and the database are not part of the code
+db
+wsdl
