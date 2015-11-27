@@ -5,10 +5,11 @@ soap = require 'soap'
 
 whereFcn = (doc) -> return true if doc.datasets?
 
-module.exports = (db, d) ->
-	util.log 'yes'
-	console.log d
-	d.on 'error', (error) -> console.log 'Error entered'
+errorFcn = (error) -> util.log 'Error encounter'
+
+module.exports = (pollInterval, db, d) ->
+	d.once 'error', errorFcn
+	setTimeout (-> d.removeListener 'error', errorFcn), pollInterval
 
 	wsdlFiles = db.getCollection 'wsdlFiles'
 	datasets = db.getCollection 'datasets'

@@ -11,7 +11,13 @@ module.exports = ([rq, rs, nx], db) ->
 	return rs.end '{"error": "No record exists"}' if not record?
 	return rs.end '{"error": "Duplicate exists"}' if (record.datasets?.find dataset)?
 	
-	keys = Object.keys record.io.input
+	register = {}
+	for item of record.io.input
+		blacklist = ['targetnamespace', 'targetnsalias']
+		i = item.replace /\[\]$/, ''
+		register[i] = record.io.input[item] if item.toLowerCase() not in blacklist
+	
+	keys = Object.keys register
 	input = Object.keys dataset
 	return rs.end '{"error": "Inputs do not match"}' if not Object.equal input, keys
 
