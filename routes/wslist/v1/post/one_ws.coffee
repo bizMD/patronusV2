@@ -17,9 +17,7 @@ searchObj = (child, node) ->
 	return node[child] if node[child]? # If the child is a child of the node, stop
 	return searchObj child, node[obj] for obj of node when Object.has node, obj # Else, recurse
 
-module.exports = ([rq, rs, nx], db) ->
-	d = domain.create()
-	
+module.exports = ([rq, rs, nx], db, d) ->
 	rs.writeHead 200, {"Content-Type": "text/plain"}
 	return rs.end '{"error": "No file was given"}' if Object.equal rq.files, {}
 

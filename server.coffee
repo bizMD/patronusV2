@@ -12,6 +12,12 @@ requireDir = require 'require-dir'
 require('coffee-script/register')
 routes = requireDir 'routes', recurse: true
 
+# Require the adapter
+adapter = require resolve process.cwd(), 'helper', 'adapter'
+
+# Activate the domain
+d = domain.create()
+
 dbFile = resolve process.cwd(), 'db', 'loki.json'
 db = new loki dbFile,
 	autosave: true
@@ -19,6 +25,8 @@ db = new loki dbFile,
 
 wsdlFiles = db.getCollection 'wsdlFiles'
 wsdlFiles = db.addCollection 'wsdlFiles' if Object.equal wsdlFiles, null
+datasets = db.getCollection 'datasets'
+datasets = db.addCollection 'datasets' if Object.equal datasets, null
 # db.saveDatabase()
 
 db.loadDatabase {}, ->
@@ -33,28 +41,42 @@ db.loadDatabase {}, ->
 	server.use restify.CORS()
 	server.use restify.fullResponse()
 	
-	# Define REST API
-	server.get '/resource/1/wslist', (args...) -> routes.wslist.v1.get.all args, db
-	server.get '/resource/1/wslist/:ws', (args...) -> routes.wslist.v1.get.one_ws args, db
-	server.get '/resource/1/wslist/:ws/:act', (args...) -> routes.wslist.v1.get.one_ws_action args, db
+	# Define REST API: wslist
+	server.get '/resource/1/wslist', (args...) -> routes.wslist.v1.get.all args, db, d
+	server.get '/resource/1/wslist/:ws', (args...) -> routes.wslist.v1.get.one_ws args, db, d
+	server.get '/resource/1/wslist/:ws/:act', (args...) -> routes.wslist.v1.get.one_ws_action args, db, d
 
-	server.post '/resource/1/wslist/:ws', (args...) -> routes.wslist.v1.post.one_ws args, db
-	server.post '/resource/1/wslist/:ws/:act', (args...) -> routes.wslist.v1.post.one_ws_action args, db
+	server.post '/resource/1/wslist/:ws', (args...) -> routes.wslist.v1.post.one_ws args, db, d
+	server.post '/resource/1/wslist/:ws/:act', (args...) -> routes.wslist.v1.post.one_ws_action args, db, d
 
-	server.put '/resource/1/wslist/:ws', (args...) -> routes.wslist.v1.put.one_ws args, db
-	server.put '/resource/1/wslist/:ws/:act', (args...) -> routes.wslist.v1.put.one_ws_action args, db
+	server.put '/resource/1/wslist/:ws', (args...) -> routes.wslist.v1.put.one_ws args, db, d
+	server.put '/resource/1/wslist/:ws/:act', (args...) -> routes.wslist.v1.put.one_ws_action args, db, d
 
-	server.del '/resource/1/wslist', (args...) -> routes.wslist.v1.del.all args, db
-	server.del '/resource/1/wslist/:ws', (args...) -> routes.wslist.v1.del.one_ws args, db
-	server.del '/resource/1/wslist/:ws/:act', (args...) -> routes.wslist.v1.del.one_ws_action args, db
+	server.del '/resource/1/wslist', (args...) -> routes.wslist.v1.del.all args, db, d
+	server.del '/resource/1/wslist/:ws', (args...) -> routes.wslist.v1.del.one_ws args, db, d
+	server.del '/resource/1/wslist/:ws/:act', (args...) -> routes.wslist.v1.del.one_ws_action args, db, d
 	
+	# Define REST API: wsdataset
+	server.get '/resource/1/wsdataset', (args...) -> routes.wsdataset.v1.get.all args, db, d
+	server.get '/resource/1/wsdataset/:name', (args...) -> routes.wsdataset.v1.get.one_set args, db, d
+
+	server.post '/resource/1/wsdataset/:name', (args...) -> routes.wsdataset.v1.post.one_set args, db, d
+
+	server.put '/resource/1/wsdataset/:name', (args...) -> routes.wsdataset.v1.put.one_set args, db, d
+
+	server.del '/resource/1/wsdataset', (args...) -> routes.wsdataset.v1.del.all args, db, d
+	server.del '/resource/1/wsdataset/:name', (args...) -> routes.wsdataset.v1.del.one_set args, db, d
+
 	# For the timer to trigger a polling
+	# Disadvantage is this approach does not let us have two instances running
+	# Or else the same queries will be redundantly made to Remedy
 	coffeeBin = 'node_modules/coffee-script/bin/coffee'
 	coffeeTimer = resolve process.cwd(), 'helper', 'timer.coffee'
 	pollInterval = 5000 # 5 seconds for dev mode
+	
 	timer = spawn process.execPath, [coffeeBin, coffeeTimer, pollInterval], cwd: process.cwd()
 	timer.on 'error', (error) -> util.log error
-	timer.stdout.on 'data', (data) -> util.log data
+	timer.stdout.on 'data', -> adapter db, d
 	timer.stderr.on 'data', (data) -> util.log data
 	timer.on 'exit', -> util.log "Timer [#{timer.pid}] has shut down"
 
