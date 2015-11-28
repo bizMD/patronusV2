@@ -5,7 +5,9 @@ soap = require 'soap'
 
 whereFcn = (doc) -> return true if doc.datasets?
 
-errorFcn = (error) -> util.log 'Error encounter'
+errorFcn = (error) ->
+	util.log 'Error encounter'
+	# console.log error
 
 module.exports = (pollInterval, db, d) ->
 	d.once 'error', errorFcn
@@ -21,6 +23,7 @@ module.exports = (pollInterval, db, d) ->
 			# WSDL File
 			file = resolve process.cwd(), 'wsdl', record.wsdl + '.xml'
 			soap.createClient file, d.intercept (client) ->
+				console.log record.action
 				client[record.action] d.intercept (results, a, b, c) ->
 					datasets.insert result for result in results
 					db.saveDatabase()

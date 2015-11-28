@@ -42,30 +42,30 @@ db.loadDatabase {}, ->
 	server.use restify.fullResponse()
 	
 	# Define REST API: wslist
-	server.get '/resource/1/wslist', (args...) -> routes.wslist.v1.get.all args, db, d
-	server.get '/resource/1/wslist/:ws', (args...) -> routes.wslist.v1.get.one_ws args, db, d
-	server.get '/resource/1/wslist/:ws/:act', (args...) -> routes.wslist.v1.get.one_ws_action args, db, d
+	server.get '/resource/1/wslist', (args...) -> routes.wslist.v1.get.all args, db
+	server.get '/resource/1/wslist/:ws', (args...) -> routes.wslist.v1.get.one_ws args, db
+	server.get '/resource/1/wslist/:ws/:act', (args...) -> routes.wslist.v1.get.one_ws_action args, db
 
-	server.post '/resource/1/wslist/:ws', (args...) -> routes.wslist.v1.post.one_ws args, db, d
-	server.post '/resource/1/wslist/:ws/:act', (args...) -> routes.wslist.v1.post.one_ws_action args, db, d
+	server.post '/resource/1/wslist/:ws', (args...) -> routes.wslist.v1.post.one_ws args, db
+	server.post '/resource/1/wslist/:ws/:act', (args...) -> routes.wslist.v1.post.one_ws_action args, db
 
-	server.put '/resource/1/wslist/:ws', (args...) -> routes.wslist.v1.put.one_ws args, db, d
-	server.put '/resource/1/wslist/:ws/:act', (args...) -> routes.wslist.v1.put.one_ws_action args, db, d
+	server.put '/resource/1/wslist/:ws', (args...) -> routes.wslist.v1.put.one_ws args, db
+	server.put '/resource/1/wslist/:ws/:act', (args...) -> routes.wslist.v1.put.one_ws_action args, db
 
-	server.del '/resource/1/wslist', (args...) -> routes.wslist.v1.del.all args, db, d
-	server.del '/resource/1/wslist/:ws', (args...) -> routes.wslist.v1.del.one_ws args, db, d
-	server.del '/resource/1/wslist/:ws/:act', (args...) -> routes.wslist.v1.del.one_ws_action args, db, d
+	server.del '/resource/1/wslist', (args...) -> routes.wslist.v1.del.all args, db
+	server.del '/resource/1/wslist/:ws', (args...) -> routes.wslist.v1.del.one_ws args, db
+	server.del '/resource/1/wslist/:ws/:act', (args...) -> routes.wslist.v1.del.one_ws_action args, db
 	
 	# Define REST API: wsdataset
-	server.get '/resource/1/wsdataset', (args...) -> routes.wsdataset.v1.get.all args, db, d
-	server.get '/resource/1/wsdataset/:name', (args...) -> routes.wsdataset.v1.get.one_set args, db, d
+	server.get '/resource/1/wsdataset', (args...) -> routes.wsdataset.v1.get.all args, db
+	server.get '/resource/1/wsdataset/:name', (args...) -> routes.wsdataset.v1.get.one_set args, db
 
-	server.post '/resource/1/wsdataset/:name', (args...) -> routes.wsdataset.v1.post.one_set args, db, d
+	server.post '/resource/1/wsdataset/:name', (args...) -> routes.wsdataset.v1.post.one_set args, db
 
-	server.put '/resource/1/wsdataset/:name', (args...) -> routes.wsdataset.v1.put.one_set args, db, d
+	server.put '/resource/1/wsdataset/:name', (args...) -> routes.wsdataset.v1.put.one_set args, db
 
-	server.del '/resource/1/wsdataset', (args...) -> routes.wsdataset.v1.del.all args, db, d
-	server.del '/resource/1/wsdataset/:name', (args...) -> routes.wsdataset.v1.del.one_set args, db, d
+	server.del '/resource/1/wsdataset', (args...) -> routes.wsdataset.v1.del.all args, db
+	server.del '/resource/1/wsdataset/:name', (args...) -> routes.wsdataset.v1.del.one_set args, db
 
 	# For the timer to trigger a polling
 	# Disadvantage is this approach does not let us have two instances running
@@ -81,7 +81,10 @@ db.loadDatabase {}, ->
 	timer.on 'exit', -> util.log "Timer [#{timer.pid}] has shut down"
 
 	# Listening on each operation
-	server.on 'after', (a,b) -> console.log "== After call =="
+	server.on 'after', (req, res, route, error) ->
+		console.log "== After call =="
+		console.log "Error: #{error}"
+		console.log "================"
 
 	# Log when the web server starts up
 	server.listen 80, -> console.log "#{server.name}[#{process.pid}] online: #{server.url}"
