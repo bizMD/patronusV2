@@ -72,8 +72,8 @@
               
                 
                 <li>
-                  <a class="source" href="put_one_dataset.html">
-                    put_one_dataset.coffee
+                  <a class="source" href="post_one_dataset.html">
+                    post_one_dataset.coffee
                   </a>
                 </li>
               
@@ -172,16 +172,27 @@
         
           <div class='highlight'><pre><span class="hljs-built_in">require</span> <span class="hljs-string">'sugar'</span>
 del = <span class="hljs-built_in">require</span> <span class="hljs-string">'del'</span>
-util = <span class="hljs-built_in">require</span> <span class="hljs-string">'util'</span>
 docco = <span class="hljs-built_in">require</span> <span class="hljs-string">'docco'</span>
 globby = <span class="hljs-built_in">require</span> <span class="hljs-string">'globby'</span>
 Promise = <span class="hljs-built_in">require</span> <span class="hljs-string">'bluebird'</span>
-{exec} = <span class="hljs-built_in">require</span> <span class="hljs-string">'child_process'</span>
+{exec, spawn} = <span class="hljs-built_in">require</span> <span class="hljs-string">'child_process'</span>
 {watch} = <span class="hljs-built_in">require</span> <span class="hljs-string">'chokidar'</span>
 {files} = <span class="hljs-built_in">require</span> <span class="hljs-string">'node-dir'</span>
 {resolve, sep, dirname, extname, basename} = <span class="hljs-built_in">require</span> <span class="hljs-string">'path'</span>
 
-option <span class="hljs-string">'-t'</span>, <span class="hljs-string">'--test'</span>, <span class="hljs-string">'Does nothing'</span>
+option <span class="hljs-string">'-t'</span>, <span class="hljs-string">'--test'</span>, <span class="hljs-string">'Does nothing'</span><span class="hljs-function">
+
+<span class="hljs-title">spinServer</span> = <span class="hljs-params">(server)</span> -&gt;</span>
+	<span class="hljs-keyword">if</span> server?
+		<span class="hljs-built_in">console</span>.log <span class="hljs-string">"Server [pid <span class="hljs-subst">#{server.pid}</span>] is shutting down"</span>
+		process.kill server.pid, <span class="hljs-string">'SIGTERM'</span>
+	server = spawn <span class="hljs-string">'node'</span> , [<span class="hljs-string">'node_modules/coffee-script/bin/coffee'</span> , <span class="hljs-string">'server.coffee'</span>]
+	<span class="hljs-built_in">console</span>.log <span class="hljs-string">"Server [pid <span class="hljs-subst">#{server.pid}</span>] is starting up"</span>
+	server.<span class="hljs-literal">on</span> <span class="hljs-string">'error'</span>, <span class="hljs-function"><span class="hljs-params">(err)</span> -&gt;</span> <span class="hljs-keyword">throw</span> err <span class="hljs-keyword">if</span> err?
+	server.stdout.<span class="hljs-literal">on</span> <span class="hljs-string">'data'</span>, <span class="hljs-function"><span class="hljs-params">(data)</span> -&gt;</span> <span class="hljs-built_in">console</span>.log data.toString()
+	server.stderr.<span class="hljs-literal">on</span> <span class="hljs-string">'data'</span>, <span class="hljs-function"><span class="hljs-params">(data)</span> -&gt;</span> <span class="hljs-built_in">console</span>.log data.toString()
+	server.<span class="hljs-literal">on</span> <span class="hljs-string">'exit'</span>, <span class="hljs-function">-&gt;</span> <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Server [pid <span class="hljs-subst">#{server.pid}</span>] has shut down"</span>
+	server
 
 task <span class="hljs-string">'docs'</span>, <span class="hljs-string">'Create documentation for the source code'</span>, <span class="hljs-function">-&gt;</span>
 	docco_cmd = <span class="hljs-string">"node node_modules/docco/bin/docco --layout linear"</span>
@@ -196,7 +207,23 @@ task <span class="hljs-string">'docs'</span>, <span class="hljs-string">'Create 
 			<span class="hljs-built_in">console</span>.log b
 	.<span class="hljs-keyword">catch</span> (error) -&gt;
 		<span class="hljs-built_in">console</span>.log <span class="hljs-string">'ERROR! Could not generate documents'</span>
-		<span class="hljs-built_in">console</span>.log error</pre></div>
+		<span class="hljs-built_in">console</span>.log error
+
+task <span class="hljs-string">'clean'</span>, <span class="hljs-string">'Reset the database and clear out files'</span>, <span class="hljs-function">-&gt;</span>
+	del [<span class="hljs-string">'db/*'</span>, <span class="hljs-string">'!db/.gitkeep'</span>, <span class="hljs-string">'wsdl/*'</span>, <span class="hljs-string">'!wsdl/.gitkeep'</span>]
+	.<span class="hljs-keyword">then</span> (paths) -&gt;
+		<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Deleted files: '</span> + paths.join <span class="hljs-string">', '</span>
+	.<span class="hljs-keyword">catch</span> (error) -&gt;
+		<span class="hljs-built_in">console</span>.log <span class="hljs-string">'ERROR! Could not generate documents'</span>
+		<span class="hljs-built_in">console</span>.log error
+
+task <span class="hljs-string">'watch'</span>, <span class="hljs-string">'Reset the server on file change'</span>, <span class="hljs-function">-&gt;</span>
+	server = spinServer()<span class="hljs-function">
+	<span class="hljs-title">reboot</span> = <span class="hljs-params">(path)</span> -&gt;</span>
+		<span class="hljs-built_in">console</span>.log <span class="hljs-string">"Change detected in <span class="hljs-subst">#{path}</span>"</span>
+		server = spinServer server
+	eyes = watch [<span class="hljs-string">'routes'</span>, <span class="hljs-string">'helper'</span>, <span class="hljs-string">'server.coffee'</span>]
+	eyes.<span class="hljs-literal">on</span> <span class="hljs-string">'change'</span>, <span class="hljs-function"><span class="hljs-params">(path)</span> -&gt;</span> reboot <span class="hljs-string">'server.coffee'</span></pre></div>
         
       
       <div class="fleur">h</div>

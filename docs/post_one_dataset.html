@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>put_one_ws.coffee</title>
+  <title>post_one_dataset.coffee</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
   <link rel="stylesheet" media="all" href="docco.css" />
@@ -13,7 +13,7 @@
 
       <div class="header">
         
-          <h1>put_one_ws.coffee</h1>
+          <h1>post_one_dataset.coffee</h1>
         
 
         
@@ -169,6 +169,79 @@
       
         
         
+        
+          <div class='highlight'><pre><span class="hljs-built_in">require</span> <span class="hljs-string">'sugar'</span>
+dotize = <span class="hljs-built_in">require</span> <span class="hljs-string">'dotize'</span>
+Promise = <span class="hljs-built_in">require</span> <span class="hljs-string">'bluebird'</span>
+
+<span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-params">([rq, rs, nx], db)</span> -&gt;</span></pre></div>
+        
+      
+        
+        <p>Send the JSON Headers</p>
+
+        
+          <div class='highlight'><pre>	rs.writeHead <span class="hljs-number">200</span>, {<span class="hljs-string">"Content-Type"</span>: <span class="hljs-string">"application/json"</span>}</pre></div>
+        
+      
+        
+        <p>Prepare the variables</p>
+
+        
+          <div class='highlight'><pre>	{name} = rq.params
+	filter = Object.extended dotize.convert Object.reject rq.params, <span class="hljs-string">'name'</span></pre></div>
+        
+      
+        
+        <p>Prepare the database objects</p>
+
+        
+          <div class='highlight'><pre>	datasets = db.getCollection <span class="hljs-string">'datasets'</span>
+	dyn = datasets.getDynamicView name
+	dyn = datasets.addDynamicView name <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> dyn?</pre></div>
+        
+      
+        
+        <p>Do initial checks</p>
+
+        
+          <div class='highlight'><pre>	<span class="hljs-keyword">new</span> Promise (resolve, reject) -&gt;
+		<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Performing initial checks...'</span>
+		resolve() <span class="hljs-keyword">if</span> Object.equal [], dyn.filterPipeline
+		<span class="hljs-keyword">for</span> item, index <span class="hljs-keyword">in</span> dyn.filterPipeline
+			reject <span class="hljs-string">'Filter already registered'</span> <span class="hljs-keyword">if</span> filter.equals item.val
+			resolve() <span class="hljs-keyword">if</span> index <span class="hljs-keyword">is</span> dyn.filterPipeline.length - <span class="hljs-number">1</span></pre></div>
+        
+      
+        
+        <p>If the checks passed, register the filter</p>
+
+        
+          <div class='highlight'><pre>	.<span class="hljs-keyword">then</span> -&gt;
+		<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Registering the filter...'</span>
+		dyn.applyFind filter
+		db.saveDatabase()
+		rs.write <span class="hljs-string">'{"status": "Filter registered"}'</span></pre></div>
+        
+      
+        
+        <p>Catch any errors</p>
+
+        
+          <div class='highlight'><pre>	.<span class="hljs-keyword">catch</span> (error) -&gt;
+		<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Catch all error handler'</span>
+		<span class="hljs-built_in">console</span>.log <span class="hljs-string">"ERROR! <span class="hljs-subst">#{error}</span>"</span>
+		rs.write <span class="hljs-string">"{\"error\": <span class="hljs-subst">#{error}</span>}"</span></pre></div>
+        
+      
+        
+        <p>End the response at the end</p>
+
+        
+          <div class='highlight'><pre>	.<span class="hljs-keyword">finally</span> -&gt;
+		<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Ending the response...'</span>
+		rs.end()
+		nx()</pre></div>
         
       
       <div class="fleur">h</div>

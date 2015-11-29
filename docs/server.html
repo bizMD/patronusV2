@@ -72,8 +72,8 @@
               
                 
                 <li>
-                  <a class="source" href="put_one_dataset.html">
-                    put_one_dataset.coffee
+                  <a class="source" href="post_one_dataset.html">
+                    post_one_dataset.coffee
                   </a>
                 </li>
               
@@ -218,8 +218,10 @@ db = <span class="hljs-keyword">new</span> loki dbFile,
         <p>Get or create the collection</p>
 
         
-          <div class='highlight'><pre>wsdlFiles = db.getCollection <span class="hljs-string">'wsdlFiles'</span> <span class="hljs-keyword">or</span> db.addCollection <span class="hljs-string">'wsdlFiles'</span>
-datasets = db.getCollection <span class="hljs-string">'datasets'</span> <span class="hljs-keyword">or</span> db.addCollection <span class="hljs-string">'datasets'</span></pre></div>
+          <div class='highlight'><pre>wsdlFiles = db.getCollection <span class="hljs-string">'wsdlFiles'</span>
+wsdlFiles = db.addCollection <span class="hljs-string">'wsdlFiles'</span> <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> wsdlFiles?
+datasets = db.getCollection <span class="hljs-string">'datasets'</span>
+datasets = db.addCollection <span class="hljs-string">'datasets'</span> <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> datasets?</pre></div>
         
       
         
