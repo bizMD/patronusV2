@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>server.coffee</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="page">
+
+      <div class="header">
+        
+          <h1>server.coffee</h1>
+        
+
+        
+          <div class="toc">
+            <h3>Table of Contents</h3>
+            <ol>
+              
+                
+                <li>
+                  <a class="source" href="Cakefile.html">
+                    Cakefile
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="adapter.html">
+                    adapter.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="timer.html">
+                    timer.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="delete_all.html">
+                    delete_all.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="delete_one_dataset.html">
+                    delete_one_dataset.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="get_all.html">
+                    get_all.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="get_one_dataset.html">
+                    get_one_dataset.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="put_one_dataset.html">
+                    put_one_dataset.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="put_one_dataset.html">
+                    put_one_dataset.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="delete_all.html">
+                    delete_all.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="delete_one_ws.html">
+                    delete_one_ws.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="delete_one_ws_action.html">
+                    delete_one_ws_action.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="get_all.html">
+                    get_all.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="get_one_ws.html">
+                    get_one_ws.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="get_one_ws_action.html">
+                    get_one_ws_action.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="post_one_ws.html">
+                    post_one_ws.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="post_one_ws_action.html">
+                    post_one_ws_action.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="put_one_ws.html">
+                    put_one_ws.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="put_one_ws_action.html">
+                    put_one_ws_action.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="server.html">
+                    server.coffee
+                  </a>
+                </li>
+              
+            </ol>
+          </div>
+        
+      </div>
+
+      
+        
+        <p>Require the dependencies</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-built_in">require</span> <span class="hljs-string">'sugar'</span>
+util = <span class="hljs-built_in">require</span> <span class="hljs-string">'util'</span>
+loki = <span class="hljs-built_in">require</span> <span class="hljs-string">'lokijs'</span>
+domain = <span class="hljs-built_in">require</span> <span class="hljs-string">'domain'</span>
+restify = <span class="hljs-built_in">require</span> <span class="hljs-string">'restify'</span>
+{resolve} = <span class="hljs-built_in">require</span> <span class="hljs-string">'path'</span>
+{spawn} = <span class="hljs-built_in">require</span> <span class="hljs-string">'child_process'</span></pre></div>
+        
+      
+        
+        <p>Require the routes directory</p>
+
+        
+          <div class='highlight'><pre>requireDir = <span class="hljs-built_in">require</span> <span class="hljs-string">'require-dir'</span>
+<span class="hljs-built_in">require</span>(<span class="hljs-string">'coffee-script/register'</span>)
+routes = requireDir <span class="hljs-string">'routes'</span>, <span class="hljs-attribute">recurse</span>: <span class="hljs-literal">true</span></pre></div>
+        
+      
+        
+        <p>Require the adapter</p>
+
+        
+          <div class='highlight'><pre>adapter = <span class="hljs-built_in">require</span> resolve process.cwd(), <span class="hljs-string">'helper'</span>, <span class="hljs-string">'adapter'</span></pre></div>
+        
+      
+        
+        <p>Activate the domain</p>
+
+        
+          <div class='highlight'><pre>d = domain.create()
+d.<span class="hljs-literal">on</span> <span class="hljs-string">'error'</span>, <span class="hljs-function"><span class="hljs-params">(error)</span> -&gt;</span> <span class="hljs-built_in">console</span>.log error</pre></div>
+        
+      
+        
+        <p>Create the database connection</p>
+
+        
+          <div class='highlight'><pre>dbFile = resolve process.cwd(), <span class="hljs-string">'db'</span>, <span class="hljs-string">'loki.json'</span>
+db = <span class="hljs-keyword">new</span> loki dbFile,
+	<span class="hljs-attribute">autosave</span>: <span class="hljs-literal">true</span>
+	<span class="hljs-attribute">autosaveInterval</span>: <span class="hljs-number">1000</span></pre></div>
+        
+      
+        
+        <p>Get or create the collection</p>
+
+        
+          <div class='highlight'><pre>wsdlFiles = db.getCollection <span class="hljs-string">'wsdlFiles'</span> <span class="hljs-keyword">or</span> db.addCollection <span class="hljs-string">'wsdlFiles'</span>
+datasets = db.getCollection <span class="hljs-string">'datasets'</span> <span class="hljs-keyword">or</span> db.addCollection <span class="hljs-string">'datasets'</span></pre></div>
+        
+      
+        
+        <p>Before doing anything, make sure the database is already connected</p>
+
+        
+          <div class='highlight'><pre>db.loadDatabase {}, <span class="hljs-function">-&gt;</span></pre></div>
+        
+      
+        
+        <p>Ensure that the database is always up to date</p>
+
+        
+          <div class='highlight'><pre>	(<span class="hljs-function">-&gt;</span> db.loadDatabase()).every <span class="hljs-number">5000</span>
+	(<span class="hljs-function">-&gt;</span> db.saveDatabase()).every <span class="hljs-number">1000</span></pre></div>
+        
+      
+        
+        <p>Create the web server and use middleware</p>
+
+        
+          <div class='highlight'><pre>	server = restify.createServer <span class="hljs-attribute">name</span>: <span class="hljs-string">'PatronusV2'</span>
+	server.use restify.bodyParser()
+	server.pre restify.pre.sanitizePath()
+	server.use restify.CORS()
+	server.use restify.fullResponse()</pre></div>
+        
+      
+        
+        <p>Define REST API: wslist
+TODO: Document the API here</p>
+
+        
+          <div class='highlight'><pre>	server.get <span class="hljs-string">'/resource/1/wslist'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wslist.v1.get.get_all args, db
+	server.get <span class="hljs-string">'/resource/1/wslist/:ws'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wslist.v1.get.get_one_ws args, db
+	server.get <span class="hljs-string">'/resource/1/wslist/:ws/:act'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wslist.v1.get.get_one_ws_action args, db
+	server.post <span class="hljs-string">'/resource/1/wslist/:ws'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wslist.v1.post.post_one_ws args, db
+	server.post <span class="hljs-string">'/resource/1/wslist/:ws/:act'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wslist.v1.post.post_one_ws_action args, db
+	server.put <span class="hljs-string">'/resource/1/wslist/:ws'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wslist.v1.put.put_one_ws args, db
+	server.put <span class="hljs-string">'/resource/1/wslist/:ws/:act'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wslist.v1.put.put_one_ws_action args, db
+	server.del <span class="hljs-string">'/resource/1/wslist'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wslist.v1.del.delete_all args, db
+	server.del <span class="hljs-string">'/resource/1/wslist/:ws'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wslist.v1.del.delete_one_ws args, db
+	server.del <span class="hljs-string">'/resource/1/wslist/:ws/:act'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wslist.v1.del.delete_one_ws_action args, db</pre></div>
+        
+      
+        
+        <p>Define REST API: wsdataset
+TODO: Document the API here</p>
+
+        
+          <div class='highlight'><pre>	server.get <span class="hljs-string">'/resource/1/wsdataset'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wsdataset.v1.get.get_all args, db
+	server.get <span class="hljs-string">'/resource/1/wsdataset/:name'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wsdataset.v1.get.get_one_dataset args, db
+	server.post <span class="hljs-string">'/resource/1/wsdataset/:name'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wsdataset.v1.post.post_one_dataset args, db
+	server.put <span class="hljs-string">'/resource/1/wsdataset/:name'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wsdataset.v1.put.put_one_dataset args, db
+	server.del <span class="hljs-string">'/resource/1/wsdataset'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wsdataset.v1.del.delete_all args, db
+	server.del <span class="hljs-string">'/resource/1/wsdataset/:name'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wsdataset.v1.del.delete_one_dataset args, db</pre></div>
+        
+      
+        
+        <p>This section triggers the polling process.
+The disadvantage of this approach is we can’t let two instances run
+or else the same queries will be redundantly made to Remedy</p>
+
+        
+          <div class='highlight'><pre>	coffeeBin = <span class="hljs-string">'node_modules/coffee-script/bin/coffee'</span>
+	coffeeTimer = resolve process.cwd(), <span class="hljs-string">'helper'</span>, <span class="hljs-string">'timer.coffee'</span>
+	pollInterval = <span class="hljs-number">5000</span> <span class="hljs-comment"># 5 seconds for dev mode</span>
+	
+	timer = spawn process.execPath, [coffeeBin, coffeeTimer, pollInterval], <span class="hljs-attribute">cwd</span>: process.cwd()
+	timer.<span class="hljs-literal">on</span> <span class="hljs-string">'error'</span>, <span class="hljs-function"><span class="hljs-params">(error)</span> -&gt;</span> util.log error
+	timer.stdout.<span class="hljs-literal">on</span> <span class="hljs-string">'data'</span>, <span class="hljs-function">-&gt;</span> adapter pollInterval, db
+	timer.stderr.<span class="hljs-literal">on</span> <span class="hljs-string">'data'</span>, <span class="hljs-function"><span class="hljs-params">(data)</span> -&gt;</span> util.log data
+	timer.<span class="hljs-literal">on</span> <span class="hljs-string">'exit'</span>, <span class="hljs-function">-&gt;</span> util.log <span class="hljs-string">"Timer [<span class="hljs-subst">#{timer.pid}</span>] has shut down"</span></pre></div>
+        
+      
+        
+        <p>After each operation, log if there was an error</p>
+
+        
+          <div class='highlight'><pre>	server.<span class="hljs-literal">on</span> <span class="hljs-string">'after'</span>, <span class="hljs-function"><span class="hljs-params">(req, res, route, error)</span> -&gt;</span>
+		<span class="hljs-built_in">console</span>.log <span class="hljs-string">"======= After call ======="</span>
+		<span class="hljs-built_in">console</span>.log <span class="hljs-string">"Error: <span class="hljs-subst">#{error}</span>"</span>
+		<span class="hljs-built_in">console</span>.log <span class="hljs-string">"=========================="</span></pre></div>
+        
+      
+        
+        <p>Run the server under an active domain</p>
+
+        
+          <div class='highlight'><pre>	d.run -&gt;</pre></div>
+        
+      
+        
+        <p>Log when the web server starts up</p>
+
+        
+          <div class='highlight'><pre>		server.listen <span class="hljs-number">80</span>, <span class="hljs-function">-&gt;</span> <span class="hljs-built_in">console</span>.log <span class="hljs-string">"<span class="hljs-subst">#{server.name}</span>[<span class="hljs-subst">#{process.pid}</span>] online: <span class="hljs-subst">#{server.url}</span>"</span>
+		<span class="hljs-built_in">console</span>.log <span class="hljs-string">"<span class="hljs-subst">#{server.name}</span> is starting..."</span></pre></div>
+        
+      
+      <div class="fleur">h</div>
+    </div>
+  </div>
+</body>
+</html>

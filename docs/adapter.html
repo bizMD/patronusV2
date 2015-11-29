@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>adapter.coffee</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="page">
+
+      <div class="header">
+        
+          <h1>adapter.coffee</h1>
+        
+
+        
+          <div class="toc">
+            <h3>Table of Contents</h3>
+            <ol>
+              
+                
+                <li>
+                  <a class="source" href="Cakefile.html">
+                    Cakefile
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="adapter.html">
+                    adapter.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="timer.html">
+                    timer.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="delete_all.html">
+                    delete_all.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="delete_one_dataset.html">
+                    delete_one_dataset.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="get_all.html">
+                    get_all.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="get_one_dataset.html">
+                    get_one_dataset.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="put_one_dataset.html">
+                    put_one_dataset.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="put_one_dataset.html">
+                    put_one_dataset.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="delete_all.html">
+                    delete_all.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="delete_one_ws.html">
+                    delete_one_ws.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="delete_one_ws_action.html">
+                    delete_one_ws_action.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="get_all.html">
+                    get_all.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="get_one_ws.html">
+                    get_one_ws.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="get_one_ws_action.html">
+                    get_one_ws_action.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="post_one_ws.html">
+                    post_one_ws.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="post_one_ws_action.html">
+                    post_one_ws_action.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="put_one_ws.html">
+                    put_one_ws.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="put_one_ws_action.html">
+                    put_one_ws_action.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="server.html">
+                    server.coffee
+                  </a>
+                </li>
+              
+            </ol>
+          </div>
+        
+      </div>
+
+      
+        
+        <p>Require the dependencies</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-built_in">require</span> <span class="hljs-string">'sugar'</span>
+soap = <span class="hljs-built_in">require</span> <span class="hljs-string">'soap'</span>
+globby = <span class="hljs-built_in">require</span> <span class="hljs-string">'globby'</span>
+Promise = <span class="hljs-built_in">require</span> <span class="hljs-string">'bluebird'</span>
+{resolve, sep} = <span class="hljs-built_in">require</span> <span class="hljs-string">'path'</span></pre></div>
+        
+      
+        
+        <p>This function is supplied to the where</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">whereFunction</span> = <span class="hljs-params">(doc)</span> -&gt;</span>
+	<span class="hljs-literal">true</span> <span class="hljs-keyword">if</span> doc.datasets?
+
+<span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-params">(pollInterval, db)</span> -&gt;</span></pre></div>
+        
+      
+        
+        <p>Load the collection objects</p>
+
+        
+          <div class='highlight'><pre>	wsdlFiles = db.getCollection <span class="hljs-string">'wsdlFiles'</span>
+	datasets = db.getCollection <span class="hljs-string">'datasets'</span></pre></div>
+        
+      
+        
+        <p>Grab all the records with datasets</p>
+
+        
+          <div class='highlight'><pre>	<span class="hljs-keyword">for</span> record <span class="hljs-keyword">in</span> wsdlFiles.where whereFunction</pre></div>
+        
+      
+        
+        <p>Grab all the datasets in those records</p>
+
+        
+          <div class='highlight'><pre>		<span class="hljs-keyword">for</span> dataset <span class="hljs-keyword">in</span> record.datasets</pre></div>
+        
+      
+        
+        <p>Grab the path to the WSDL file</p>
+
+        
+          <div class='highlight'><pre>			<span class="hljs-built_in">console</span>.log <span class="hljs-string">"Grabbing the path to the <span class="hljs-subst">#{record.wsdl}</span> WSDL..."</span>
+			Promise.resolve globby <span class="hljs-string">"wsdl<span class="hljs-subst">#{sep}</span><span class="hljs-subst">#{record.wsdl}</span>*"</span></pre></div>
+        
+      
+        
+        <p>Create a SOAP client</p>
+
+        
+          <div class='highlight'><pre>			.<span class="hljs-keyword">then</span> (path) -&gt;
+				<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Creating the client...'</span>
+				<span class="hljs-keyword">new</span> Promise (resolve, reject) -&gt;
+					soap.createClient path[<span class="hljs-number">0</span>], <span class="hljs-function"><span class="hljs-params">(error, client)</span> -&gt;</span>
+						reject error <span class="hljs-keyword">if</span> error?
+						resolve client</pre></div>
+        
+      
+        
+        <p>If the client is successful, create a SOAP request</p>
+
+        
+          <div class='highlight'><pre>			.<span class="hljs-keyword">then</span> (client) -&gt;
+				<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Retrieving data...'</span>
+				<span class="hljs-keyword">new</span> Promise (resolve, reject) -&gt;
+					client[record.action] dataset, <span class="hljs-function"><span class="hljs-params">(error, results)</span> -&gt;</span>
+						reject error <span class="hljs-keyword">if</span> error?
+						resolve results</pre></div>
+        
+      
+        
+        <p>If the request is successful, save the data to the database</p>
+
+        
+          <div class='highlight'><pre>			.<span class="hljs-keyword">then</span> (results) -&gt;
+				<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Saving data...'</span></pre></div>
+        
+      
+        
+        <p>Inserting data to the DB is harder than I thought…
+Assumption, I get an array of objects for multiple results
+Or a single object for one result</p>
+
+        
+          <div class='highlight'><pre>				<span class="hljs-built_in">console</span>.log datasets.insert
+				datasets.insert result <span class="hljs-keyword">for</span> result <span class="hljs-keyword">in</span> results <span class="hljs-keyword">if</span> Object.isArray results
+				datasets.insert results <span class="hljs-keyword">if</span> Object.isObject results
+
+				db.saveDatabase()
+				<span class="hljs-built_in">console</span>.log datasets.data</pre></div>
+        
+      
+        
+        <p>Catch any exceptions and errors</p>
+
+        
+          <div class='highlight'><pre>			.<span class="hljs-keyword">catch</span> (error) -&gt;
+				<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Catch all error handler'</span>
+				<span class="hljs-built_in">console</span>.log <span class="hljs-string">"ERROR! <span class="hljs-subst">#{error}</span>"</span>
+				<span class="hljs-built_in">console</span>.log error?.root?.Envelope?.Body?.Fault</pre></div>
+        
+      
+      <div class="fleur">h</div>
+    </div>
+  </div>
+</body>
+</html>

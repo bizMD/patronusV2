@@ -17,18 +17,19 @@ adapter = require resolve process.cwd(), 'helper', 'adapter'
 
 # Activate the domain
 d = domain.create()
+d.on 'error', (error) -> console.log error
 
+# Create the database connection
 dbFile = resolve process.cwd(), 'db', 'loki.json'
 db = new loki dbFile,
 	autosave: true
 	autosaveInterval: 1000
 
-wsdlFiles = db.getCollection 'wsdlFiles'
-wsdlFiles = db.addCollection 'wsdlFiles' if Object.equal wsdlFiles, null
-datasets = db.getCollection 'datasets'
-datasets = db.addCollection 'datasets' if Object.equal datasets, null
-# db.saveDatabase()
+# Get or create the collection
+wsdlFiles = db.getCollection 'wsdlFiles' or db.addCollection 'wsdlFiles'
+datasets = db.getCollection 'datasets' or db.addCollection 'datasets'
 
+# Before doing anything, make sure the database is already connected
 db.loadDatabase {}, ->
 	# Ensure that the database is always up to date
 	(-> db.loadDatabase()).every 5000
@@ -42,34 +43,30 @@ db.loadDatabase {}, ->
 	server.use restify.fullResponse()
 	
 	# Define REST API: wslist
-	server.get '/resource/1/wslist', (args...) -> routes.wslist.v1.get.all args, db
-	server.get '/resource/1/wslist/:ws', (args...) -> routes.wslist.v1.get.one_ws args, db
-	server.get '/resource/1/wslist/:ws/:act', (args...) -> routes.wslist.v1.get.one_ws_action args, db
-
-	server.post '/resource/1/wslist/:ws', (args...) -> routes.wslist.v1.post.one_ws args, db
-	server.post '/resource/1/wslist/:ws/:act', (args...) -> routes.wslist.v1.post.one_ws_action args, db
-
-	server.put '/resource/1/wslist/:ws', (args...) -> routes.wslist.v1.put.one_ws args, db
-	server.put '/resource/1/wslist/:ws/:act', (args...) -> routes.wslist.v1.put.one_ws_action args, db
-
-	server.del '/resource/1/wslist', (args...) -> routes.wslist.v1.del.all args, db
-	server.del '/resource/1/wslist/:ws', (args...) -> routes.wslist.v1.del.one_ws args, db
-	server.del '/resource/1/wslist/:ws/:act', (args...) -> routes.wslist.v1.del.one_ws_action args, db
+	# TODO: Document the API here
+	server.get '/resource/1/wslist', (args...) -> routes.wslist.v1.get.get_all args, db
+	server.get '/resource/1/wslist/:ws', (args...) -> routes.wslist.v1.get.get_one_ws args, db
+	server.get '/resource/1/wslist/:ws/:act', (args...) -> routes.wslist.v1.get.get_one_ws_action args, db
+	server.post '/resource/1/wslist/:ws', (args...) -> routes.wslist.v1.post.post_one_ws args, db
+	server.post '/resource/1/wslist/:ws/:act', (args...) -> routes.wslist.v1.post.post_one_ws_action args, db
+	server.put '/resource/1/wslist/:ws', (args...) -> routes.wslist.v1.put.put_one_ws args, db
+	server.put '/resource/1/wslist/:ws/:act', (args...) -> routes.wslist.v1.put.put_one_ws_action args, db
+	server.del '/resource/1/wslist', (args...) -> routes.wslist.v1.del.delete_all args, db
+	server.del '/resource/1/wslist/:ws', (args...) -> routes.wslist.v1.del.delete_one_ws args, db
+	server.del '/resource/1/wslist/:ws/:act', (args...) -> routes.wslist.v1.del.delete_one_ws_action args, db
 	
 	# Define REST API: wsdataset
-	server.get '/resource/1/wsdataset', (args...) -> routes.wsdataset.v1.get.all args, db
-	server.get '/resource/1/wsdataset/:name', (args...) -> routes.wsdataset.v1.get.one_set args, db
+	# TODO: Document the API here
+	server.get '/resource/1/wsdataset', (args...) -> routes.wsdataset.v1.get.get_all args, db
+	server.get '/resource/1/wsdataset/:name', (args...) -> routes.wsdataset.v1.get.get_one_dataset args, db
+	server.post '/resource/1/wsdataset/:name', (args...) -> routes.wsdataset.v1.post.post_one_dataset args, db
+	server.put '/resource/1/wsdataset/:name', (args...) -> routes.wsdataset.v1.put.put_one_dataset args, db
+	server.del '/resource/1/wsdataset', (args...) -> routes.wsdataset.v1.del.delete_all args, db
+	server.del '/resource/1/wsdataset/:name', (args...) -> routes.wsdataset.v1.del.delete_one_dataset args, db
 
-	server.post '/resource/1/wsdataset/:name', (args...) -> routes.wsdataset.v1.post.one_set args, db
-
-	server.put '/resource/1/wsdataset/:name', (args...) -> routes.wsdataset.v1.put.one_set args, db
-
-	server.del '/resource/1/wsdataset', (args...) -> routes.wsdataset.v1.del.all args, db
-	server.del '/resource/1/wsdataset/:name', (args...) -> routes.wsdataset.v1.del.one_set args, db
-
-	# For the timer to trigger a polling
-	# Disadvantage is this approach does not let us have two instances running
-	# Or else the same queries will be redundantly made to Remedy
+	# This section triggers the polling process.
+	# The disadvantage of this approach is we can't let two instances run
+	# or else the same queries will be redundantly made to Remedy
 	coffeeBin = 'node_modules/coffee-script/bin/coffee'
 	coffeeTimer = resolve process.cwd(), 'helper', 'timer.coffee'
 	pollInterval = 5000 # 5 seconds for dev mode
@@ -80,12 +77,14 @@ db.loadDatabase {}, ->
 	timer.stderr.on 'data', (data) -> util.log data
 	timer.on 'exit', -> util.log "Timer [#{timer.pid}] has shut down"
 
-	# Listening on each operation
+	# After each operation, log if there was an error
 	server.on 'after', (req, res, route, error) ->
 		console.log "======= After call ======="
 		console.log "Error: #{error}"
 		console.log "=========================="
 
-	# Log when the web server starts up
-	server.listen 80, -> console.log "#{server.name}[#{process.pid}] online: #{server.url}"
-	console.log "#{server.name} is starting..."
+	# Run the server under an active domain
+	d.run ->
+		# Log when the web server starts up
+		server.listen 80, -> console.log "#{server.name}[#{process.pid}] online: #{server.url}"
+		console.log "#{server.name} is starting..."

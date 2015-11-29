@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>post_one_ws_action.coffee</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="page">
+
+      <div class="header">
+        
+          <h1>post_one_ws_action.coffee</h1>
+        
+
+        
+          <div class="toc">
+            <h3>Table of Contents</h3>
+            <ol>
+              
+                
+                <li>
+                  <a class="source" href="Cakefile.html">
+                    Cakefile
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="adapter.html">
+                    adapter.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="timer.html">
+                    timer.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="delete_all.html">
+                    delete_all.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="delete_one_dataset.html">
+                    delete_one_dataset.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="get_all.html">
+                    get_all.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="get_one_dataset.html">
+                    get_one_dataset.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="put_one_dataset.html">
+                    put_one_dataset.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="put_one_dataset.html">
+                    put_one_dataset.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="delete_all.html">
+                    delete_all.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="delete_one_ws.html">
+                    delete_one_ws.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="delete_one_ws_action.html">
+                    delete_one_ws_action.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="get_all.html">
+                    get_all.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="get_one_ws.html">
+                    get_one_ws.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="get_one_ws_action.html">
+                    get_one_ws_action.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="post_one_ws.html">
+                    post_one_ws.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="post_one_ws_action.html">
+                    post_one_ws_action.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="put_one_ws.html">
+                    put_one_ws.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="put_one_ws_action.html">
+                    put_one_ws_action.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="server.html">
+                    server.coffee
+                  </a>
+                </li>
+              
+            </ol>
+          </div>
+        
+      </div>
+
+      
+        
+        <p>Require the dependencies</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-built_in">require</span> <span class="hljs-string">'sugar'</span>
+soap = <span class="hljs-built_in">require</span> <span class="hljs-string">'soap'</span>
+globby = <span class="hljs-built_in">require</span> <span class="hljs-string">'globby'</span>
+Promise = <span class="hljs-built_in">require</span> <span class="hljs-string">'bluebird'</span>
+{resolve, sep} = <span class="hljs-built_in">require</span> <span class="hljs-string">'path'</span>
+
+<span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-params">([rq, rs, nx], db)</span> -&gt;</span></pre></div>
+        
+      
+        
+        <p>Set the JSON headers</p>
+
+        
+          <div class='highlight'><pre>	rs.writeHead <span class="hljs-number">200</span>, {<span class="hljs-string">"Content-Type"</span>: <span class="hljs-string">"application/json"</span>}</pre></div>
+        
+      
+        
+        <p>Set the variables</p>
+
+        
+          <div class='highlight'><pre>	{ws, act} = rq.params
+	dataset = Object.reject rq.params, <span class="hljs-string">'ws'</span>, <span class="hljs-string">'act'</span>
+	wsdlFiles = db.getCollection <span class="hljs-string">'wsdlFiles'</span>
+	record = (wsdlFiles.find <span class="hljs-string">'$and'</span>: [{<span class="hljs-attribute">wsdl</span>: ws}, {<span class="hljs-attribute">action</span>: act}])[<span class="hljs-number">0</span>]</pre></div>
+        
+      
+        
+        <p>Perform initial checks</p>
+
+        
+          <div class='highlight'><pre>	<span class="hljs-keyword">new</span> Promise (resolve, reject) -&gt;
+		<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Performing initial checks...'</span>
+		reject <span class="hljs-string">'No record exists'</span> <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> record?
+		reject <span class="hljs-string">'Duplicate exists'</span> <span class="hljs-keyword">if</span> (record.datasets?.find dataset)?
+		
+		register = <span class="hljs-keyword">for</span> item <span class="hljs-keyword">of</span> record.io.input
+			blacklist = [<span class="hljs-string">'targetnamespace'</span>, <span class="hljs-string">'targetnsalias'</span>]
+			i = item.replace <span class="hljs-regexp">/\[\]$/</span>, <span class="hljs-string">''</span>
+			i <span class="hljs-keyword">if</span> item.toLowerCase() <span class="hljs-keyword">not</span> <span class="hljs-keyword">in</span> blacklist
+		input = Object.keys dataset
+		reject <span class="hljs-string">'Input in bad format'</span> <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> Object.equal input, register
+		
+		resolve()</pre></div>
+        
+      
+        
+        <p>Then, if the checks pass, get the path to the WSDL file</p>
+
+        
+          <div class='highlight'><pre>	.<span class="hljs-keyword">then</span> -&gt;
+		<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Preparing the path to the WSDL file...'</span>
+		Promise.resolve globby <span class="hljs-string">"wsdl<span class="hljs-subst">#{sep}</span><span class="hljs-subst">#{ws}</span>*"</span></pre></div>
+        
+      
+        
+        <p>Then, create a SOAP client</p>
+
+        
+          <div class='highlight'><pre>	.<span class="hljs-keyword">then</span> (path) -&gt;
+		<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Loading the WSDL file...'</span>
+		<span class="hljs-keyword">new</span> Promise (resolve, reject) -&gt;
+			soap.createClient path[<span class="hljs-number">0</span>], <span class="hljs-function"><span class="hljs-params">(error, client)</span> -&gt;</span>
+				reject error <span class="hljs-keyword">if</span> error?
+				<span class="hljs-keyword">try</span> client.describe()
+				<span class="hljs-keyword">catch</span> error <span class="hljs-keyword">then</span> reject error
+				resolve client</pre></div>
+        
+      
+        
+        <p>Then, if the WSDL is loaded successfully, make a test request</p>
+
+        
+          <div class='highlight'><pre>	.<span class="hljs-keyword">then</span> (client) -&gt;
+		<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Testing the input data...'</span>
+		<span class="hljs-keyword">new</span> Promise (resolve, reject) -&gt;
+			client.addSoapHeader record.credentials <span class="hljs-keyword">if</span> record.credentials?
+			client[act] dataset, <span class="hljs-function"><span class="hljs-params">(error, results)</span> -&gt;</span>
+				reject error <span class="hljs-keyword">if</span> error?
+				resolve results</pre></div>
+        
+      
+        
+        <p>Then, if the test request was successful, store the requested data set</p>
+
+        
+          <div class='highlight'><pre>	.<span class="hljs-keyword">then</span> (results) -&gt;
+		<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Inserting data into database...'</span>
+		rs.write JSON.stringify result <span class="hljs-keyword">for</span> result <span class="hljs-keyword">in</span> results
+		record.datasets ?= []
+		record.datasets.push dataset
+		wsdlFiles.update record
+		<span class="hljs-built_in">console</span>.log wsdlFiles.data</pre></div>
+        
+      
+        
+        <p>Catch any errors or exceptions</p>
+
+        
+          <div class='highlight'><pre>	.<span class="hljs-keyword">catch</span> (error) -&gt;
+		<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Catch all error handler'</span>
+		<span class="hljs-built_in">console</span>.log <span class="hljs-string">"ERROR! <span class="hljs-subst">#{error}</span>"</span>
+		rs.write <span class="hljs-string">"{\"error\": \"<span class="hljs-subst">#{error}</span>\"}"</span></pre></div>
+        
+      
+        
+        <p>Finally, end the response</p>
+
+        
+          <div class='highlight'><pre>	.<span class="hljs-keyword">finally</span> -&gt;
+		<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Ending response...'</span>
+		rs.end()
+		nx()</pre></div>
+        
+      
+      <div class="fleur">h</div>
+    </div>
+  </div>
+</body>
+</html>

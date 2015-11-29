@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>Cakefile</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="page">
+
+      <div class="header">
+        
+          <h1>Cakefile</h1>
+        
+
+        
+          <div class="toc">
+            <h3>Table of Contents</h3>
+            <ol>
+              
+                
+                <li>
+                  <a class="source" href="Cakefile.html">
+                    Cakefile
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="adapter.html">
+                    adapter.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="timer.html">
+                    timer.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="delete_all.html">
+                    delete_all.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="delete_one_dataset.html">
+                    delete_one_dataset.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="get_all.html">
+                    get_all.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="get_one_dataset.html">
+                    get_one_dataset.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="put_one_dataset.html">
+                    put_one_dataset.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="put_one_dataset.html">
+                    put_one_dataset.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="delete_all.html">
+                    delete_all.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="delete_one_ws.html">
+                    delete_one_ws.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="delete_one_ws_action.html">
+                    delete_one_ws_action.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="get_all.html">
+                    get_all.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="get_one_ws.html">
+                    get_one_ws.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="get_one_ws_action.html">
+                    get_one_ws_action.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="post_one_ws.html">
+                    post_one_ws.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="post_one_ws_action.html">
+                    post_one_ws_action.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="put_one_ws.html">
+                    put_one_ws.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="put_one_ws_action.html">
+                    put_one_ws_action.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="server.html">
+                    server.coffee
+                  </a>
+                </li>
+              
+            </ol>
+          </div>
+        
+      </div>
+
+      
+        
+        
+        
+          <div class='highlight'><pre><span class="hljs-built_in">require</span> <span class="hljs-string">'sugar'</span>
+del = <span class="hljs-built_in">require</span> <span class="hljs-string">'del'</span>
+util = <span class="hljs-built_in">require</span> <span class="hljs-string">'util'</span>
+docco = <span class="hljs-built_in">require</span> <span class="hljs-string">'docco'</span>
+globby = <span class="hljs-built_in">require</span> <span class="hljs-string">'globby'</span>
+Promise = <span class="hljs-built_in">require</span> <span class="hljs-string">'bluebird'</span>
+{exec} = <span class="hljs-built_in">require</span> <span class="hljs-string">'child_process'</span>
+{watch} = <span class="hljs-built_in">require</span> <span class="hljs-string">'chokidar'</span>
+{files} = <span class="hljs-built_in">require</span> <span class="hljs-string">'node-dir'</span>
+{resolve, sep, dirname, extname, basename} = <span class="hljs-built_in">require</span> <span class="hljs-string">'path'</span>
+
+option <span class="hljs-string">'-t'</span>, <span class="hljs-string">'--test'</span>, <span class="hljs-string">'Does nothing'</span>
+
+task <span class="hljs-string">'docs'</span>, <span class="hljs-string">'Create documentation for the source code'</span>, <span class="hljs-function">-&gt;</span>
+	docco_cmd = <span class="hljs-string">"node node_modules/docco/bin/docco --layout linear"</span>
+	globby [<span class="hljs-string">'routes/**/*.coffee'</span>, <span class="hljs-string">'helper/*.coffee'</span>, <span class="hljs-string">'Cakefile'</span>, <span class="hljs-string">'server.coffee'</span>]
+	.<span class="hljs-keyword">then</span> (paths) -&gt;
+		<span class="hljs-keyword">for</span> path <span class="hljs-keyword">in</span> paths
+			pathDir = dirname path
+			docco_cmd += <span class="hljs-string">" -o docs/<span class="hljs-subst">#{pathDir}</span> <span class="hljs-subst">#{path}</span>"</span>
+		exec docco_cmd, <span class="hljs-function"><span class="hljs-params">(error, a, b)</span> -&gt;</span>
+			reject error <span class="hljs-keyword">if</span> error?
+			<span class="hljs-built_in">console</span>.log a
+			<span class="hljs-built_in">console</span>.log b
+	.<span class="hljs-keyword">catch</span> (error) -&gt;
+		<span class="hljs-built_in">console</span>.log <span class="hljs-string">'ERROR! Could not generate documents'</span>
+		<span class="hljs-built_in">console</span>.log error</pre></div>
+        
+      
+      <div class="fleur">h</div>
+    </div>
+  </div>
+</body>
+</html>
