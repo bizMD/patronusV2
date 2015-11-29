@@ -16,6 +16,9 @@ module.exports = (pollInterval, db) ->
 	datasets = db.getCollection 'datasets'
 	console.log 'Adapter triggered...'
 
+	# Purge the datasets
+	datasets.removeDataOnly()
+
 	# Grab all the records with datasets
 	for record in wsdlFiles.where whereFunction
 		console.log 'Found record with dataset attribute'
