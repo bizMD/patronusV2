@@ -1,5 +1,7 @@
 module.exports = ([rq, rs, nx], db) ->
+	# Set the JSON headers
 	rs.writeHead 200, {"Content-Type": "application/json"}
+	
 	wsdlFiles = db.getCollection 'wsdlFiles'
 	console.log wsdlFiles.data
 	

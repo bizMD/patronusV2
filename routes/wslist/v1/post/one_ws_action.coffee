@@ -1,63 +1,76 @@
+# Require the dependencies
 require 'sugar'
-vow = require 'vow'
 soap = require 'soap'
 globby = require 'globby'
-domain = require 'domain'
+Promise = require 'bluebird'
 {resolve, sep} = require 'path'
 
-# The timeout period
-timeoutPeriod = 30000
-d = domain.create()
-
-errorFcn = (error, rs, nx) ->
-	console.log 'I got here'
-	rs.end '{"error": "Error occurred"}'
-	nx()
-
-d.on 'error', (err) -> errorFcn
-
 module.exports = ([rq, rs, nx], db) ->
-	rs.writeHead 200, {"Content-Type": "text/plain"}
+	# Set the JSON headers
+	rs.writeHead 200, {"Content-Type": "application/json"}
 
-	# On error, end the response
-	d.once 'error', (error) -> return errorFcn error, rs, nx
-	# The query has #{timeoutPeriod} seconds to complete
-	stop = setTimeout (-> errorFcn 'Timeout triggered', d, rs, nx ), timeoutPeriod
-
+	# Set the variables
 	{ws, act} = rq.params
 	dataset = Object.reject rq.params, 'ws', 'act'
-
 	wsdlFiles = db.getCollection 'wsdlFiles'
 	record = (wsdlFiles.find '$and': [{wsdl: ws}, {action: act}])[0]
-	return rs.end '{"error": "No record exists"}' if not record?
-	return rs.end '{"error": "Duplicate exists"}' if (record.datasets?.find dataset)?
 	
-	register = {}
-	for item of record.io.input
-		blacklist = ['targetnamespace', 'targetnsalias']
-		i = item.replace /\[\]$/, ''
-		register[i] = record.io.input[item] if item.toLowerCase() not in blacklist
-	
-	keys = Object.keys register
-	input = Object.keys dataset
-	return rs.end '{"error": "Inputs do not match"}' if not Object.equal input, keys
+	# Perform initial checks
+	new Promise (resolve, reject) ->
+		console.log 'Performing initial checks...'
+		reject 'No record exists' if not record?
+		reject 'Duplicate exists' if (record.datasets?.find dataset)?
+		
+		register = for item of record.io.input
+			blacklist = ['targetnamespace', 'targetnsalias']
+			i = item.replace /\[\]$/, ''
+			i if item.toLowerCase() not in blacklist
+		input = Object.keys dataset
+		reject 'Input in bad format' if not Object.equal input, register
+		
+		resolve()
 
-	globby "wsdl#{sep}#{ws}*"
-	.then (paths) ->
-		new vow.Promise (resolve) ->
-			soap.createClient paths[0], d.intercept (client) ->
-				client.describe()
-				client.addSoapHeader record.credentials if record.credentials?
-				client[act] dataset, d.intercept (results) ->
-					rs.write JSON.stringify result for result in results
-					clearInterval stop
-					resolve()
+	# Then, if the checks pass, get the path to the WSDL file
 	.then ->
-		console.log 'I still got here'
+		console.log 'Preparing the path to the WSDL file...'
+		Promise.resolve globby "wsdl#{sep}#{ws}*"
+
+	# Then, create a SOAP client
+	.then (path) ->
+		console.log 'Loading the WSDL file...'
+		new Promise (resolve, reject) ->
+			soap.createClient path[0], (error, client) ->
+				reject error if error?
+				try client.describe()
+				catch error then reject error
+				resolve client
+
+	# Then, if the WSDL is loaded successfully, make a test request
+	.then (client) ->
+		console.log 'Testing the input data...'
+		new Promise (resolve, reject) ->
+			client.addSoapHeader record.credentials if record.credentials?
+			client[act] dataset, (error, results) ->
+				reject error if error?
+				resolve results
+
+	# Then, if the test request was successful, store the requested data set
+	.then (results) ->
+		console.log 'Inserting data into database...'
+		rs.write JSON.stringify result for result in results
 		record.datasets ?= []
 		record.datasets.push dataset
 		wsdlFiles.update record
 		console.log wsdlFiles.data
-		
+
+	# Catch any errors or exceptions
+	.catch (error) ->
+		console.log 'Catch all error handler'
+		console.log "ERROR! #{error}"
+		rs.write "{\"error\": \"#{error}\"}"
+
+	# Finally, end the response
+	.finally ->
+		console.log 'Ending response...'
 		rs.end()
 		nx()

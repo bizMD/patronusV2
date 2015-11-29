@@ -76,15 +76,15 @@ db.loadDatabase {}, ->
 	
 	timer = spawn process.execPath, [coffeeBin, coffeeTimer, pollInterval], cwd: process.cwd()
 	timer.on 'error', (error) -> util.log error
-	timer.stdout.on 'data', -> adapter pollInterval, db, d
+	timer.stdout.on 'data', -> adapter pollInterval, db
 	timer.stderr.on 'data', (data) -> util.log data
 	timer.on 'exit', -> util.log "Timer [#{timer.pid}] has shut down"
 
 	# Listening on each operation
 	server.on 'after', (req, res, route, error) ->
-		console.log "== After call =="
+		console.log "======= After call ======="
 		console.log "Error: #{error}"
-		console.log "================"
+		console.log "=========================="
 
 	# Log when the web server starts up
 	server.listen 80, -> console.log "#{server.name}[#{process.pid}] online: #{server.url}"

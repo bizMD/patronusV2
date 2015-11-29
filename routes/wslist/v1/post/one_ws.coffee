@@ -41,52 +41,52 @@ module.exports = ([rq, rs, nx], db) ->
 		console.log 'Moving the file to storage...'
 		new Promise (resolve, reject) ->
 			mv fromDir, toDir, {mkdirp: true, clobber: false}, (error) ->
-				reject error if error?
+				reject 'A file with that name already exists' if error?
 				resolve()
 
 	# Then, if the file move succeeded, check if the file is a proper WSDL
 	.then ->
 		console.log 'Parsing the WSDL file...'
-		soapPromise = new Promise (resolve, reject) ->
+
+		# The catch actions are different if the file was moved but the SOAP failed
+		# The moved file must be deleted in this case
+		# So, I have to nest a promise chain here to ensure a DB insert is made
+		# Only if the file was moved AND the SOAP passed
+		new Promise (resolve, reject) ->
 			soap.createClient toDir, (error, client) ->
 				reject error if error?
 				try description = client.describe()
 				catch error then reject error
 				resolve [client, description]
 
+		# Then, if the WSDL check passed, insert to the database
+		.then ([client, description]) ->
+			console.log 'Inserting to the database...'
+			wsdlFiles = db.getCollection 'wsdlFiles'
+			wsdlFiles.on 'insert', (record) -> console.log record
+			for action in parseWSDL description
+				wsdlFile =
+					wsdl: ws
+					action: action
+					io: searchObj action, description
+				wsdlFile.credentials = credentials if credentials?
+				rs.write JSON.stringify wsdlFile
+				wsdlFiles.insert wsdlFile
+
 		# Or, if the WSDL check failed, delete the moved file, and stop
 		.catch (error) ->
 			console.log 'SOAP-specific error handler'
 			console.log error
+			rs.write "{\"error\": \"Your upload is not a valid WSDL file\"}"
 			# Delete moved file if it exists, but not if it was already there
 			del toDir
-
-		new Promise (resolve, reject) ->
-			soapPromise
-			.then (args...) -> resolve args
-			, (error) -> reject error
-
-	# Then, if the WSDL check passed, insert to the database
-	.then (args) ->
-		[client, description] = args
-		console.log args
-		console.log 'Inserting to the database...'
-		wsdlFiles = db.getCollection 'wsdlFiles'
-		for action in parseWSDL description
-			wsdlFile =
-				wsdl: ws
-				action: action
-				io: searchObj action, description
-			wsdlFile.credentials = credentials if credentials?
-			rs.write JSON.stringify wsdlFile
-			wsdlFiles.insert wsdlFile
 
 	# Catch any other uncaught errors and log them
 	.catch (error) ->
 		# Any uncaught errors go here
 		console.log 'Catch all error handler'
-		console.log error
-		rs.write "{\"error\": \"An error occurred during the upload\"}"
+		console.log "ERROR! #{error}"
+		rs.write "{\"error\": \"#{error}\"}"
 
 	# Finally, end the response
 	.finally ->
