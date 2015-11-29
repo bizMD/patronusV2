@@ -12,11 +12,13 @@ module.exports = ([rq, rs, nx], db) ->
 	
 	# Prepare the database objects
 	datasets = db.getCollection 'datasets'
-	dyn = datasets.getDynamicView name or datasets.addDynamicView name
+	dyn = datasets.getDynamicView name
+	dyn = datasets.addDynamicView name if not dyn?
 
 	# Do initial checks
 	new Promise (resolve, reject) ->
 		console.log 'Performing initial checks...'
+		resolve() if Object.equal [], dyn.filterPipeline
 		for item, index in dyn.filterPipeline
 			reject 'Filter already registered' if filter.equals item.val
 			resolve() if index is dyn.filterPipeline.length - 1

@@ -26,8 +26,10 @@ db = new loki dbFile,
 	autosaveInterval: 1000
 
 # Get or create the collection
-wsdlFiles = db.getCollection 'wsdlFiles' or db.addCollection 'wsdlFiles'
-datasets = db.getCollection 'datasets' or db.addCollection 'datasets'
+wsdlFiles = db.getCollection 'wsdlFiles'
+wsdlFiles = db.addCollection 'wsdlFiles' if not wsdlFiles?
+datasets = db.getCollection 'datasets'
+datasets = db.addCollection 'datasets' if not datasets?
 
 # Before doing anything, make sure the database is already connected
 db.loadDatabase {}, ->
