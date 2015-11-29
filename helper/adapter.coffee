@@ -14,9 +14,12 @@ module.exports = (pollInterval, db) ->
 	# Load the collection objects
 	wsdlFiles = db.getCollection 'wsdlFiles'
 	datasets = db.getCollection 'datasets'
+	console.log 'Adapter triggered...'
 
 	# Grab all the records with datasets
 	for record in wsdlFiles.where whereFunction
+		console.log 'Found record with dataset attribute'
+		console.log record
 		# Grab all the datasets in those records
 		for dataset in record.datasets
 			

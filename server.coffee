@@ -19,7 +19,8 @@ adapter = require resolve process.cwd(), 'helper', 'adapter'
 d = domain.create()
 d.on 'error', (error) -> console.log error
 
-# Create the database connection
+# Create the database connection.
+# It autosaves every 1 second, but not if there was no change to the database
 dbFile = resolve process.cwd(), 'db', 'loki.json'
 db = new loki dbFile,
 	autosave: true
@@ -33,9 +34,13 @@ datasets = db.addCollection 'datasets' if not datasets?
 
 # Before doing anything, make sure the database is already connected
 db.loadDatabase {}, ->
-	# Ensure that the database is always up to date
-	(-> db.loadDatabase()).every 5000
-	(-> db.saveDatabase()).every 1000
+	# Ensure that the database is always up to date.
+	# This is needed because different branches of Loki need to be in sync.
+	# Otherwise, changes in one route to not affect other routes.
+	(->
+		db.loadDatabase()
+		console.log 'Refreshing database...'
+	).every 5000
 
 	# Create the web server and use middleware
 	server = restify.createServer name: 'PatronusV2'

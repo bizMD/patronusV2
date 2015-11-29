@@ -1,21 +1,21 @@
 {
   "name": "patronus",
   "version": "0.0.1",
-  "description": "Operations dashboard",
+  "description": "Back end service to query Remedy SOAP services",
   "main": "server.coffee",
   "scripts": {
     "test": "cake test"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/bizMD/sectumsempra.git"
+    "url": "https://github.com/bizMD/patronusV2.git"
   },
   "author": "Rene Calunsag",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/bizMD/sectumsempra/issues"
+    "url": "https://github.com/bizMD/patronusV2/issues"
   },
-  "homepage": "https://github.com/bizMD/sectumsempra",
+  "homepage": "https://github.com/bizMD/patronusV2",
   "dependencies": {
     "bluebird": "^3.0.5",
     "coffee-script": "^1.10.0",
@@ -46,7 +46,6 @@
     "docco": "^0.7.0",
     "install": "^0.2.3",
     "istanbul": "^0.4.0",
-    "juice": "^1.6.0",
     "mocha": "^2.3.3",
     "node-dir": "^0.1.10",
     "npm": "^3.3.10"
