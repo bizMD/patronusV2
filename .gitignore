@@ -75,6 +75,7 @@ $RECYCLE.BIN/
 *.lnk
 
 # Upload files and the database are not part of the code
+db/loki*
 !wsdl
 wsdl/*
 !wsdl/.gitkeep
