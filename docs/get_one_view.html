@@ -246,7 +246,7 @@ Promise = <span class="hljs-built_in">require</span> <span class="hljs-string">'
 <span class="hljs-title">sendView</span> = <span class="hljs-params">(rs, dyn)</span> -&gt;</span>
 	<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Retrieving the data...'</span>
 	<span class="hljs-keyword">if</span> Object.equal [], dyn.data() <span class="hljs-keyword">then</span> rs.end <span class="hljs-string">'[]'</span>
-	<span class="hljs-keyword">else</span> rs.write JSON.stringify data <span class="hljs-keyword">for</span> data <span class="hljs-keyword">in</span> dyn.data()</pre></div>
+	<span class="hljs-keyword">else</span> rs.write JSON.stringify Object.reject data, <span class="hljs-string">'meta'</span>, <span class="hljs-string">'$loki'</span> <span class="hljs-keyword">for</span> data <span class="hljs-keyword">in</span> dyn.data()</pre></div>
         
       
         

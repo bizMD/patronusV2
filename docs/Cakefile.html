@@ -187,7 +187,7 @@ Promise = <span class="hljs-built_in">require</span> <span class="hljs-string">'
 {files} = <span class="hljs-built_in">require</span> <span class="hljs-string">'node-dir'</span>
 {resolve, sep, dirname, extname, basename} = <span class="hljs-built_in">require</span> <span class="hljs-string">'path'</span>
 
-option <span class="hljs-string">'-t'</span>, <span class="hljs-string">'--test'</span>, <span class="hljs-string">'Does nothing'</span><span class="hljs-function">
+option <span class="hljs-string">'-t'</span>, <span class="hljs-string">'--test'</span>, <span class="hljs-string">'Nothing'</span><span class="hljs-function">
 
 <span class="hljs-title">spinServer</span> = <span class="hljs-params">(server)</span> -&gt;</span>
 	<span class="hljs-keyword">if</span> server?
@@ -201,7 +201,7 @@ option <span class="hljs-string">'-t'</span>, <span class="hljs-string">'--test'
 	server.<span class="hljs-literal">on</span> <span class="hljs-string">'exit'</span>, <span class="hljs-function">-&gt;</span> <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Server [pid <span class="hljs-subst">#{server.pid}</span>] has shut down"</span>
 	server
 
-task <span class="hljs-string">'docs'</span>, <span class="hljs-string">'Create documentation for the source code'</span>, <span class="hljs-function">-&gt;</span>
+task <span class="hljs-string">'docs'</span>, <span class="hljs-string">'Create documentation for the source code'</span>, <span class="hljs-function"><span class="hljs-params">(opts)</span> -&gt;</span>
 	docco_cmd = <span class="hljs-string">"node node_modules/docco/bin/docco --layout linear"</span>
 	globby [
 		<span class="hljs-string">'adapters/*.coffee'</span>

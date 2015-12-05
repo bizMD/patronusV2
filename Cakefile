@@ -8,7 +8,7 @@ Promise = require 'bluebird'
 {files} = require 'node-dir'
 {resolve, sep, dirname, extname, basename} = require 'path'
 
-option '-t', '--test', 'Does nothing'
+option '-t', '--test', 'Nothing'
 
 spinServer = (server) ->
 	if server?
@@ -22,7 +22,7 @@ spinServer = (server) ->
 	server.on 'exit', -> console.log "Server [pid #{server.pid}] has shut down"
 	server
 
-task 'docs', 'Create documentation for the source code', ->
+task 'docs', 'Create documentation for the source code', (opts) ->
 	docco_cmd = "node node_modules/docco/bin/docco --layout linear"
 	globby [
 		'adapters/*.coffee'

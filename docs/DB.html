@@ -210,15 +210,15 @@ loki = <span class="hljs-built_in">require</span> <span class="hljs-string">'lok
 <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DB</span></span>
 
 	<span class="hljs-attribute">constructor</span>: <span class="hljs-function">-&gt;</span>
-		_db = <span class="hljs-keyword">new</span> loki <span class="hljs-string">'db/loki.db'</span>,
+		<span class="hljs-property">@_db</span> = <span class="hljs-keyword">new</span> loki <span class="hljs-string">'db/loki.db'</span>,
 			<span class="hljs-attribute">autosave</span>: <span class="hljs-literal">true</span>
 			<span class="hljs-attribute">autosaveInterval</span>: <span class="hljs-property">@_saveInterval</span>
-		(<span class="hljs-function">-&gt;</span>
-			_db.loadDatabase()
-			<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Refreshing database...'</span>
-		).every <span class="hljs-property">@_loadInterval</span>
-		<span class="hljs-property">@_db</span> = _db
-		<span class="hljs-property">@_init</span>()</pre></div>
+		<span class="hljs-property">@_db</span>.loadDatabase {}, <span class="hljs-function">=&gt;</span>
+			(<span class="hljs-function">=&gt;</span>
+				<span class="hljs-property">@_db</span>.loadDatabase()
+				<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Refreshing database...'</span>
+			).every <span class="hljs-property">@_loadInterval</span>
+			<span class="hljs-property">@_init</span>()</pre></div>
         
       
         
