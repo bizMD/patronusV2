@@ -30,8 +30,15 @@
               
                 
                 <li>
-                  <a class="source" href="adapter.html">
-                    adapter.coffee
+                  <a class="source" href="remedyWS.html">
+                    remedyWS.coffee
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="DB.html">
+                    DB.coffee
                   </a>
                 </li>
               
@@ -58,22 +65,22 @@
               
                 
                 <li>
-                  <a class="source" href="get_all.html">
-                    get_all.coffee
+                  <a class="source" href="get_all_views.html">
+                    get_all_views.coffee
                   </a>
                 </li>
               
                 
                 <li>
-                  <a class="source" href="get_one_dataset.html">
-                    get_one_dataset.coffee
+                  <a class="source" href="get_one_view.html">
+                    get_one_view.coffee
                   </a>
                 </li>
               
                 
                 <li>
-                  <a class="source" href="post_one_dataset.html">
-                    post_one_dataset.coffee
+                  <a class="source" href="post_one_view.html">
+                    post_one_view.coffee
                   </a>
                 </li>
               
@@ -107,36 +114,36 @@
               
                 
                 <li>
-                  <a class="source" href="get_all.html">
-                    get_all.coffee
+                  <a class="source" href="get_all_WSDL_files.html">
+                    get_all_WSDL_files.coffee
                   </a>
                 </li>
               
                 
                 <li>
-                  <a class="source" href="get_one_ws.html">
-                    get_one_ws.coffee
+                  <a class="source" href="get_one_WSDL_file.html">
+                    get_one_WSDL_file.coffee
                   </a>
                 </li>
               
                 
                 <li>
-                  <a class="source" href="get_one_ws_action.html">
-                    get_one_ws_action.coffee
+                  <a class="source" href="get_one_WSDL_method.html">
+                    get_one_WSDL_method.coffee
                   </a>
                 </li>
               
                 
                 <li>
-                  <a class="source" href="post_one_ws.html">
-                    post_one_ws.coffee
+                  <a class="source" href="insert_WSDL_dataset.html">
+                    insert_WSDL_dataset.coffee
                   </a>
                 </li>
               
                 
                 <li>
-                  <a class="source" href="post_one_ws_action.html">
-                    post_one_ws_action.coffee
+                  <a class="source" href="upload_WSDL_file.html">
+                    upload_WSDL_file.coffee
                   </a>
                 </li>
               
@@ -193,7 +200,7 @@ routes = requireDir <span class="hljs-string">'routes'</span>, <span class="hljs
         <p>Require the adapter</p>
 
         
-          <div class='highlight'><pre>adapter = <span class="hljs-built_in">require</span> resolve process.cwd(), <span class="hljs-string">'helper'</span>, <span class="hljs-string">'adapter'</span></pre></div>
+          <div class='highlight'><pre>adapter = <span class="hljs-built_in">require</span> resolve process.cwd(), <span class="hljs-string">'adapters'</span>, <span class="hljs-string">'remedyWS'</span></pre></div>
         
       
         
@@ -205,79 +212,52 @@ d.<span class="hljs-literal">on</span> <span class="hljs-string">'error'</span>,
         
       
         
-        <p>Create the database connection</p>
+        <p>Database</p>
 
         
-          <div class='highlight'><pre>dbFile = resolve process.cwd(), <span class="hljs-string">'db'</span>, <span class="hljs-string">'loki.json'</span>
-db = <span class="hljs-keyword">new</span> loki dbFile,
-	<span class="hljs-attribute">autosave</span>: <span class="hljs-literal">true</span>
-	<span class="hljs-attribute">autosaveInterval</span>: <span class="hljs-number">1000</span></pre></div>
-        
-      
-        
-        <p>Get or create the collection</p>
-
-        
-          <div class='highlight'><pre>wsdlFiles = db.getCollection <span class="hljs-string">'wsdlFiles'</span>
-wsdlFiles = db.addCollection <span class="hljs-string">'wsdlFiles'</span> <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> wsdlFiles?
-datasets = db.getCollection <span class="hljs-string">'datasets'</span>
-datasets = db.addCollection <span class="hljs-string">'datasets'</span> <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> datasets?</pre></div>
-        
-      
-        
-        <p>Before doing anything, make sure the database is already connected</p>
-
-        
-          <div class='highlight'><pre>db.loadDatabase {}, <span class="hljs-function">-&gt;</span></pre></div>
-        
-      
-        
-        <p>Ensure that the database is always up to date</p>
-
-        
-          <div class='highlight'><pre>	(<span class="hljs-function">-&gt;</span> db.loadDatabase()).every <span class="hljs-number">5000</span>
-	(<span class="hljs-function">-&gt;</span> db.saveDatabase()).every <span class="hljs-number">1000</span></pre></div>
+          <div class='highlight'><pre>DB = <span class="hljs-built_in">require</span> resolve process.cwd(), <span class="hljs-string">'DB'</span>, <span class="hljs-string">'DB.coffee'</span>
+db = <span class="hljs-keyword">new</span> DB</pre></div>
         
       
         
         <p>Create the web server and use middleware</p>
 
         
-          <div class='highlight'><pre>	server = restify.createServer <span class="hljs-attribute">name</span>: <span class="hljs-string">'PatronusV2'</span>
-	server.use restify.bodyParser()
-	server.pre restify.pre.sanitizePath()
-	server.use restify.CORS()
-	server.use restify.fullResponse()</pre></div>
+          <div class='highlight'><pre>server = restify.createServer <span class="hljs-attribute">name</span>: <span class="hljs-string">'PatronusV2'</span>
+server.use restify.bodyParser()
+server.pre restify.pre.sanitizePath()
+server.use restify.CORS()
+server.use restify.fullResponse()</pre></div>
         
       
         
-        <p>Define REST API: wslist
+        <p>Define REST API: wsdlCache
 TODO: Document the API here</p>
 
         
-          <div class='highlight'><pre>	server.get <span class="hljs-string">'/resource/1/wslist'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wslist.v1.get.get_all args, db
-	server.get <span class="hljs-string">'/resource/1/wslist/:ws'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wslist.v1.get.get_one_ws args, db
-	server.get <span class="hljs-string">'/resource/1/wslist/:ws/:act'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wslist.v1.get.get_one_ws_action args, db
-	server.post <span class="hljs-string">'/resource/1/wslist/:ws'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wslist.v1.post.post_one_ws args, db
-	server.post <span class="hljs-string">'/resource/1/wslist/:ws/:act'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wslist.v1.post.post_one_ws_action args, db
-	server.put <span class="hljs-string">'/resource/1/wslist/:ws'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wslist.v1.put.put_one_ws args, db
-	server.put <span class="hljs-string">'/resource/1/wslist/:ws/:act'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wslist.v1.put.put_one_ws_action args, db
-	server.del <span class="hljs-string">'/resource/1/wslist'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wslist.v1.del.delete_all args, db
-	server.del <span class="hljs-string">'/resource/1/wslist/:ws'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wslist.v1.del.delete_one_ws args, db
-	server.del <span class="hljs-string">'/resource/1/wslist/:ws/:act'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wslist.v1.del.delete_one_ws_action args, db</pre></div>
+          <div class='highlight'><pre>server.get <span class="hljs-string">'/resource/1/wsdlCache'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wsdlCache.v1.get.get_all_WSDL_files args, db
+server.get <span class="hljs-string">'/resource/1/wsdlCache/:ws'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wsdlCache.v1.get.get_one_WSDL_file args, db
+server.get <span class="hljs-string">'/resource/1/wsdlCache/:ws/:act'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wsdlCache.v1.get.get_one_WSDL_method args, db
+server.post <span class="hljs-string">'/resource/1/wsdlCache/:ws'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wsdlCache.v1.post.upload_WSDL_file args, db
+server.post <span class="hljs-string">'/resource/1/wsdlCache/:ws/:act'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wsdlCache.v1.post.insert_WSDL_dataset args, db
+server.put <span class="hljs-string">'/resource/1/wsdlCache/:ws'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wsdlCache.v1.put.put_one_ws args, db
+server.put <span class="hljs-string">'/resource/1/wsdlCache/:ws/:act'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wsdlCache.v1.put.put_one_ws_action args, db
+server.del <span class="hljs-string">'/resource/1/wsdlCache'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wsdlCache.v1.del.delete_all args, db
+server.del <span class="hljs-string">'/resource/1/wsdlCache/:ws'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wsdlCache.v1.del.delete_one_ws args, db
+server.del <span class="hljs-string">'/resource/1/wsdlCache/:ws/:act'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wsdlCache.v1.del.delete_one_ws_action args, db</pre></div>
         
       
         
-        <p>Define REST API: wsdataset
+        <p>Define REST API: dataView
 TODO: Document the API here</p>
 
         
-          <div class='highlight'><pre>	server.get <span class="hljs-string">'/resource/1/wsdataset'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wsdataset.v1.get.get_all args, db
-	server.get <span class="hljs-string">'/resource/1/wsdataset/:name'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wsdataset.v1.get.get_one_dataset args, db
-	server.post <span class="hljs-string">'/resource/1/wsdataset/:name'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wsdataset.v1.post.post_one_dataset args, db
-	server.put <span class="hljs-string">'/resource/1/wsdataset/:name'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wsdataset.v1.put.put_one_dataset args, db
-	server.del <span class="hljs-string">'/resource/1/wsdataset'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wsdataset.v1.del.delete_all args, db
-	server.del <span class="hljs-string">'/resource/1/wsdataset/:name'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.wsdataset.v1.del.delete_one_dataset args, db</pre></div>
+          <div class='highlight'><pre>server.get <span class="hljs-string">'/resource/1/dataView'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.dataView.v1.get.get_all_views args, db
+server.get <span class="hljs-string">'/resource/1/dataView/:name'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.dataView.v1.get.get_one_view args, db
+server.post <span class="hljs-string">'/resource/1/dataView/:name'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.dataView.v1.post.post_one_view args, db
+server.put <span class="hljs-string">'/resource/1/dataView/:name'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.dataView.v1.put.put_one_dataset args, db
+server.del <span class="hljs-string">'/resource/1/dataView'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.dataView.v1.del.delete_all args, db
+server.del <span class="hljs-string">'/resource/1/dataView/:name'</span>, <span class="hljs-function"><span class="hljs-params">(args...)</span> -&gt;</span> routes.dataView.v1.del.delete_one_dataset args, db</pre></div>
         
       
         
@@ -286,40 +266,40 @@ The disadvantage of this approach is we can’t let two instances run
 or else the same queries will be redundantly made to Remedy</p>
 
         
-          <div class='highlight'><pre>	coffeeBin = <span class="hljs-string">'node_modules/coffee-script/bin/coffee'</span>
-	coffeeTimer = resolve process.cwd(), <span class="hljs-string">'helper'</span>, <span class="hljs-string">'timer.coffee'</span>
-	pollInterval = <span class="hljs-number">5000</span> <span class="hljs-comment"># 5 seconds for dev mode</span>
-	
-	timer = spawn process.execPath, [coffeeBin, coffeeTimer, pollInterval], <span class="hljs-attribute">cwd</span>: process.cwd()
-	timer.<span class="hljs-literal">on</span> <span class="hljs-string">'error'</span>, <span class="hljs-function"><span class="hljs-params">(error)</span> -&gt;</span> util.log error
-	timer.stdout.<span class="hljs-literal">on</span> <span class="hljs-string">'data'</span>, <span class="hljs-function">-&gt;</span> adapter pollInterval, db
-	timer.stderr.<span class="hljs-literal">on</span> <span class="hljs-string">'data'</span>, <span class="hljs-function"><span class="hljs-params">(data)</span> -&gt;</span> util.log data
-	timer.<span class="hljs-literal">on</span> <span class="hljs-string">'exit'</span>, <span class="hljs-function">-&gt;</span> util.log <span class="hljs-string">"Timer [<span class="hljs-subst">#{timer.pid}</span>] has shut down"</span></pre></div>
+          <div class='highlight'><pre>coffeeBin = <span class="hljs-string">'node_modules/coffee-script/bin/coffee'</span>
+coffeeTimer = resolve process.cwd(), <span class="hljs-string">'helper'</span>, <span class="hljs-string">'timer.coffee'</span>
+pollInterval = <span class="hljs-number">5000</span> <span class="hljs-comment"># 5 seconds for dev mode</span>
+
+timer = spawn process.execPath, [coffeeBin, coffeeTimer, pollInterval], <span class="hljs-attribute">cwd</span>: process.cwd()
+timer.<span class="hljs-literal">on</span> <span class="hljs-string">'error'</span>, <span class="hljs-function"><span class="hljs-params">(error)</span> -&gt;</span> util.log error
+timer.stdout.<span class="hljs-literal">on</span> <span class="hljs-string">'data'</span>, <span class="hljs-function">-&gt;</span> adapter pollInterval, db
+timer.stderr.<span class="hljs-literal">on</span> <span class="hljs-string">'data'</span>, <span class="hljs-function"><span class="hljs-params">(data)</span> -&gt;</span> util.log data
+timer.<span class="hljs-literal">on</span> <span class="hljs-string">'exit'</span>, <span class="hljs-function">-&gt;</span> util.log <span class="hljs-string">"Timer [<span class="hljs-subst">#{timer.pid}</span>] has shut down"</span></pre></div>
         
       
         
         <p>After each operation, log if there was an error</p>
 
         
-          <div class='highlight'><pre>	server.<span class="hljs-literal">on</span> <span class="hljs-string">'after'</span>, <span class="hljs-function"><span class="hljs-params">(req, res, route, error)</span> -&gt;</span>
-		<span class="hljs-built_in">console</span>.log <span class="hljs-string">"======= After call ======="</span>
-		<span class="hljs-built_in">console</span>.log <span class="hljs-string">"Error: <span class="hljs-subst">#{error}</span>"</span>
-		<span class="hljs-built_in">console</span>.log <span class="hljs-string">"=========================="</span></pre></div>
+          <div class='highlight'><pre>server.<span class="hljs-literal">on</span> <span class="hljs-string">'after'</span>, <span class="hljs-function"><span class="hljs-params">(req, res, route, error)</span> -&gt;</span>
+	<span class="hljs-built_in">console</span>.log <span class="hljs-string">"======= After call ======="</span>
+	<span class="hljs-built_in">console</span>.log <span class="hljs-string">"Error: <span class="hljs-subst">#{error}</span>"</span>
+	<span class="hljs-built_in">console</span>.log <span class="hljs-string">"=========================="</span></pre></div>
         
       
         
         <p>Run the server under an active domain</p>
 
         
-          <div class='highlight'><pre>	d.run -&gt;</pre></div>
+          <div class='highlight'><pre>d.run -&gt;</pre></div>
         
       
         
         <p>Log when the web server starts up</p>
 
         
-          <div class='highlight'><pre>		server.listen <span class="hljs-number">80</span>, <span class="hljs-function">-&gt;</span> <span class="hljs-built_in">console</span>.log <span class="hljs-string">"<span class="hljs-subst">#{server.name}</span>[<span class="hljs-subst">#{process.pid}</span>] online: <span class="hljs-subst">#{server.url}</span>"</span>
-		<span class="hljs-built_in">console</span>.log <span class="hljs-string">"<span class="hljs-subst">#{server.name}</span> is starting..."</span></pre></div>
+          <div class='highlight'><pre>	server.listen <span class="hljs-number">80</span>, <span class="hljs-function">-&gt;</span> <span class="hljs-built_in">console</span>.log <span class="hljs-string">"<span class="hljs-subst">#{server.name}</span>[<span class="hljs-subst">#{process.pid}</span>] online: <span class="hljs-subst">#{server.url}</span>"</span>
+	<span class="hljs-built_in">console</span>.log <span class="hljs-string">"<span class="hljs-subst">#{server.name}</span> is starting..."</span></pre></div>
         
       
       <div class="fleur">h</div>

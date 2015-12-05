@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>get_one_ws_action.coffee</title>
+  <title>Get A Function From A WSDL File</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
   <link rel="stylesheet" media="all" href="docco.css" />
@@ -13,7 +13,10 @@
 
       <div class="header">
         
-          <h1>get_one_ws_action.coffee</h1>
+          
+          <h1 id="get-a-function-from-a-wsdl-file">Get A Function From A WSDL File</h1>
+
+          
         
 
         
@@ -25,6 +28,13 @@
                 <li>
                   <a class="source" href="Cakefile.html">
                     Cakefile
+                  </a>
+                </li>
+              
+                
+                <li>
+                  <a class="source" href="DB.html">
+                    DB.coffee
                   </a>
                 </li>
               
@@ -107,15 +117,15 @@
               
                 
                 <li>
-                  <a class="source" href="get_all.html">
-                    get_all.coffee
+                  <a class="source" href="get_all_WSDL_files.html">
+                    get_all_WSDL_files.coffee
                   </a>
                 </li>
               
                 
                 <li>
-                  <a class="source" href="get_one_ws.html">
-                    get_one_ws.coffee
+                  <a class="source" href="get_one_WSDL_file.html">
+                    get_one_WSDL_file.coffee
                   </a>
                 </li>
               
@@ -168,44 +178,151 @@
 
       
         
-        
-        
-          <div class='highlight'><pre><span class="hljs-built_in">require</span> <span class="hljs-string">'sugar'</span>
-Promise = <span class="hljs-built_in">require</span> <span class="hljs-string">'bluebird'</span>
+        <p>This route is designed to return a named function of a named wsdlFile.</p>
 
-<span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-params">([rq, rs, nx], db)</span> -&gt;</span></pre></div>
         
       
         
-        <p>Set the JSON headers</p>
+        <h2 id="requiring-dependencies">Requiring Dependencies</h2>
 
         
-          <div class='highlight'><pre>	rs.writeHead <span class="hljs-number">200</span>, {<span class="hljs-string">"Content-Type"</span>: <span class="hljs-string">"application/json"</span>}
+      
+        
+        <p>Require the modules we need for this class.
+In addition, this also instantiates the database</p>
 
+        
+          <div class='highlight'><pre>
+<span class="hljs-built_in">require</span> <span class="hljs-string">'sugar'</span>
+Promise = <span class="hljs-built_in">require</span> <span class="hljs-string">'bluebird'</span>
+{resolve} = <span class="hljs-built_in">require</span> <span class="hljs-string">'path'</span>
+db = <span class="hljs-keyword">new</span> <span class="hljs-built_in">require</span> resolve process.cwd(), <span class="hljs-string">'DB'</span>, <span class="hljs-string">'DB.coffee'</span></pre></div>
+        
+      
+        
+        <h2 id="promised-record">Promised Record</h2>
+
+        
+      
+        
+        <p>This function returns a promise that will either resolve to the WSDL record, or reject into an error message.</p>
+
+        
+      
+        
+        <p><strong>Input</strong>: a RESTify request object</p>
+
+        
+      
+        
+        <p><strong>Output</strong>:</p>
+<ol>
+<li>On success, the WSDL record with action taken from the request object. It must find the record in the database for it to succeed.</li>
+<li>On failure, the error message “Either #{ws} or #{act} does not exist”. It will reject if the record does not exist in the database.</li>
+</ol>
+
+        
+          <div class='highlight'><pre><span class="hljs-function">
+<span class="hljs-title">promisedRecord</span> = <span class="hljs-params">(rq)</span> -&gt;</span>
 	<span class="hljs-keyword">new</span> Promise (resolve, reject) -&gt;
 		{ws, act} = rq.params
 		wsdlFiles = db.getCollection <span class="hljs-string">'wsdlFiles'</span>
 		query = [{<span class="hljs-attribute">wsdl</span>: ws}, {<span class="hljs-attribute">action</span>: act}]
 		record = (wsdlFiles.find <span class="hljs-string">'$and'</span>: query)[<span class="hljs-number">0</span>]
 		reject <span class="hljs-string">"Either <span class="hljs-subst">#{ws}</span> or <span class="hljs-subst">#{act}</span> does not exist"</span> <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> record?
-		resolve record
-	.<span class="hljs-keyword">then</span> (record) -&gt;
-		<span class="hljs-built_in">console</span>.log record</pre></div>
+		resolve record</pre></div>
         
       
         
-        <p>Important to touch only the data to preserve the original</p>
+        <h2 id="send-action">Send Action</h2>
 
         
-          <div class='highlight'><pre>		data = Object.reject record, <span class="hljs-string">'meta'</span>, <span class="hljs-string">'$loki'</span>
-		rs.write JSON.stringify data.io
-		rs.end()
+      
+        
+        <p>This function logs the received record and sends back the retrieved WSDL to the requestor.</p>
+
+        
+      
+        
+        <p><strong>Input</strong>: a RESTify response object, a loki object</p>
+
+        
+      
+        
+        <p><strong>Output</strong>:</p>
+<ol>
+<li>On success, returns nothing. It will log and send the record to the requestor.</li>
+<li>On failure, it will only fail on an unexpected error.</li>
+</ol>
+
+        
+          <div class='highlight'><pre><span class="hljs-function">
+<span class="hljs-title">sendAction</span> = <span class="hljs-params">(rs, record)</span> -&gt;</span>
+	<span class="hljs-built_in">console</span>.log record
+	rs.write JSON.stringify record.io
+	rs.end()</pre></div>
+        
+      
+        
+        <h2 id="error-catcher">Error Catcher</h2>
+
+        
+      
+        
+        <p>This function logs an error and sends back the error message.</p>
+
+        
+      
+        
+        <p><strong>Input</strong>: a RESTify response object, an error message</p>
+
+        
+      
+        
+        <p><strong>Output</strong>: returns nothing. It will log and send the error to the requestor.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-function">
+<span class="hljs-title">errorCatcher</span> = <span class="hljs-params">(rs, error)</span> -&gt;</span>
+	<span class="hljs-built_in">console</span>.log error
+	rs.write <span class="hljs-string">"{\"error\": <span class="hljs-subst">#{error}</span>}"</span></pre></div>
+        
+      
+        
+        <h2 id="final-function">Final Function</h2>
+
+        
+      
+        
+        <p>This function ends the response and moves on to the next middleware if defined</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-function">
+<span class="hljs-title">finalFunction</span> = <span class="hljs-params">(rs, nx)</span> -&gt;</span>
+	rs.end()
+	nx()</pre></div>
+        
+      
+        
+        <h2 id="route-definition">Route Definition</h2>
+
+        
+      
+        
+        <p>This will return the headers with HTTP 200 Status Code, and a JSON content type. Afterwards, it will take collection, take the stored data, and remove the meta and $loki tags.</p>
+
+        
+          <div class='highlight'><pre>
+<span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-params">(rq, rs, nx)</span> -&gt;</span>
+	rs.writeHead <span class="hljs-number">200</span>, {<span class="hljs-string">"Content-Type"</span>: <span class="hljs-string">"application/json"</span>}
+
+	promisedRecord rq
+	.<span class="hljs-keyword">then</span> (record) -&gt;
+		sendAction rs, record
 	.<span class="hljs-keyword">catch</span> (error) -&gt;
-		<span class="hljs-built_in">console</span>.log error
-		rs.write <span class="hljs-string">"{\"error\": <span class="hljs-subst">#{error}</span>}"</span>
-	.<span class="hljs-keyword">finally</span> () -&gt;
-		rs.end()
-		nx()</pre></div>
+		errorCatcher rs, error
+	.finalFunction -&gt;
+		finalFunction rs, nx</pre></div>
         
       
       <div class="fleur">h</div>

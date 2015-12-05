@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>Get One WSDL File</title>
+  <title>Upload One WSDL File</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
   <link rel="stylesheet" media="all" href="docco.css" />
@@ -14,7 +14,7 @@
       <div class="header">
         
           
-          <h1 id="get-one-wsdl-file">Get One WSDL File</h1>
+          <h1 id="upload-one-wsdl-file">Upload One WSDL File</h1>
 
           
         
@@ -33,15 +33,15 @@
               
                 
                 <li>
-                  <a class="source" href="DB.html">
-                    DB.coffee
+                  <a class="source" href="remedyWS.html">
+                    remedyWS.coffee
                   </a>
                 </li>
               
                 
                 <li>
-                  <a class="source" href="adapter.html">
-                    adapter.coffee
+                  <a class="source" href="DB.html">
+                    DB.coffee
                   </a>
                 </li>
               
@@ -68,22 +68,22 @@
               
                 
                 <li>
-                  <a class="source" href="get_all.html">
-                    get_all.coffee
+                  <a class="source" href="get_all_views.html">
+                    get_all_views.coffee
                   </a>
                 </li>
               
                 
                 <li>
-                  <a class="source" href="get_one_dataset.html">
-                    get_one_dataset.coffee
+                  <a class="source" href="get_one_view.html">
+                    get_one_view.coffee
                   </a>
                 </li>
               
                 
                 <li>
-                  <a class="source" href="post_one_dataset.html">
-                    post_one_dataset.coffee
+                  <a class="source" href="post_one_view.html">
+                    post_one_view.coffee
                   </a>
                 </li>
               
@@ -138,15 +138,15 @@
               
                 
                 <li>
-                  <a class="source" href="post_one_ws.html">
-                    post_one_ws.coffee
+                  <a class="source" href="insert_WSDL_dataset.html">
+                    insert_WSDL_dataset.coffee
                   </a>
                 </li>
               
                 
                 <li>
-                  <a class="source" href="post_one_ws_action.html">
-                    post_one_ws_action.coffee
+                  <a class="source" href="upload_WSDL_file.html">
+                    upload_WSDL_file.coffee
                   </a>
                 </li>
               
@@ -178,7 +178,7 @@
 
       
         
-        <p>This route is designed to return the contents of a named wsdlFile.</p>
+        <p>This route is designed to receive a wsdl file upload and its credentials.</p>
 
         
       
@@ -198,8 +198,7 @@ mv = <span class="hljs-built_in">require</span> <span class="hljs-string">'mv'</
 del = <span class="hljs-built_in">require</span> <span class="hljs-string">'del'</span>
 soap = <span class="hljs-built_in">require</span> <span class="hljs-string">'soap'</span>
 Promise = <span class="hljs-built_in">require</span> <span class="hljs-string">'bluebird'</span>
-{resolve, extname} = <span class="hljs-built_in">require</span> <span class="hljs-string">'path'</span>
-db = <span class="hljs-keyword">new</span> <span class="hljs-built_in">require</span> resolve process.cwd(), <span class="hljs-string">'DB'</span>, <span class="hljs-string">'DB.coffee'</span></pre></div>
+{resolve, extname} = <span class="hljs-built_in">require</span> <span class="hljs-string">'path'</span></pre></div>
         
       
         
@@ -213,10 +212,12 @@ db = <span class="hljs-keyword">new</span> <span class="hljs-built_in">require</
         
       
         
-        <p>It will scan every child of the object.
-<em>If the child is named “input” then push the name of that parent to an array.
-</em>If the child is an object, call this function with the child as an input and push the result to the array.
-*If the child fits neither of the two above, do nothing.</p>
+        <p>It will scan every child of the object.</p>
+<ul>
+<li>If the child is named “input” then push the name of that parent to an array.</li>
+<li>If the child is an object, call this function with the child as an input and push the result to the array.</li>
+<li>If the child fits neither of the two above, do nothing.</li>
+</ul>
 
         
       
@@ -253,10 +254,12 @@ db = <span class="hljs-keyword">new</span> <span class="hljs-built_in">require</
         
       
         
-        <p>It has the following logic:
-<em>If the current object has a child with the specified name, return that child
-</em>Else, recurse. For all children of the object, call this function with that child passed in as the new haystack
-*If the child is not an object, it will not pass the first two conditions. In that case, do nothing.</p>
+        <p>It has the following logic:</p>
+<ul>
+<li>If the current object has a child with the specified name, return that child</li>
+<li>Else, recurse. For all children of the object, call this function with that child passed in as the new haystack</li>
+<li>If the child is not an object, it will not pass the first two conditions. In that case, do nothing.</li>
+</ul>
 
         
       
@@ -349,7 +352,7 @@ db = <span class="hljs-keyword">new</span> <span class="hljs-built_in">require</
         
       
         
-        <p><strong>Input</strong>: the temporary file path (source), the direction folder</p>
+        <p><strong>Input</strong>: the WSDL file location</p>
 
         
       
@@ -383,7 +386,7 @@ db = <span class="hljs-keyword">new</span> <span class="hljs-built_in">require</
         
       
         
-        <p><strong>Input</strong>: a RESTify request object, and an array containing the SOAP client and web service description in that order</p>
+        <p><strong>Input</strong>: a RESTify request and response object, the name of the wsdl, the database link, and an array containing the SOAP client and web service description in that order</p>
 
         
       
@@ -396,7 +399,7 @@ db = <span class="hljs-keyword">new</span> <span class="hljs-built_in">require</
 
         
           <div class='highlight'><pre><span class="hljs-function">
-<span class="hljs-title">insertToDatabase</span> = <span class="hljs-params">(rq, [client, description])</span> -&gt;</span>
+<span class="hljs-title">insertToDatabase</span> = <span class="hljs-params">(rq, rs, db, ws, [client, description])</span> -&gt;</span>
 	<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Inserting to the database...'</span>
 	credentials = rq.params.credentials
 	wsdlFiles = db.getCollection <span class="hljs-string">'wsdlFiles'</span>
@@ -483,10 +486,10 @@ db = <span class="hljs-keyword">new</span> <span class="hljs-built_in">require</
 	.<span class="hljs-keyword">then</span> -&gt; promisedMoveFile fromDir, toDir
 	.<span class="hljs-keyword">then</span> -&gt;
 		promisedSOAP toDir
-		.<span class="hljs-keyword">then</span> (clientObj) -&gt; insertToDatabase rq, clientObj
+		.<span class="hljs-keyword">then</span> (clientObj) -&gt; insertToDatabase rq, rs, db, ws, clientObj
 		.<span class="hljs-keyword">catch</span> (error) -&gt;
 			<span class="hljs-built_in">console</span>.log <span class="hljs-string">'SOAP-specific error handler'</span>
-			errorCatcher rs, <span class="hljs-string">"Your upload is not a valid WSDL file"</span>
+			errorCatcher rs, error
 			del toDir
 	.<span class="hljs-keyword">catch</span> (error) -&gt; errorCatcher rs, error
 	.<span class="hljs-keyword">finally</span> -&gt; finalFunction rs, nx</pre></div>

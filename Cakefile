@@ -24,7 +24,14 @@ spinServer = (server) ->
 
 task 'docs', 'Create documentation for the source code', ->
 	docco_cmd = "node node_modules/docco/bin/docco --layout linear"
-	globby ['routes/**/*.coffee', 'helper/*.coffee', 'Cakefile', 'server.coffee']
+	globby [
+		'adapters/*.coffee'
+		'db/DB.coffee'
+		'routes/**/*.coffee'
+		'helper/*.coffee'
+		'Cakefile'
+		'server.coffee'
+	]
 	.then (paths) ->
 		for path in paths
 			pathDir = dirname path
@@ -38,9 +45,10 @@ task 'docs', 'Create documentation for the source code', ->
 		console.log error
 
 task 'clean', 'Reset the database and clear out files', ->
-	del ['db/*', '!db/.gitkeep', 'wsdl/*', '!wsdl/.gitkeep']
+	del ['db/*', '!db/DB.coffee', 'wsdl/*', '!wsdl/.gitkeep']
 	.then (paths) ->
-		console.log 'Deleted files: ' + paths.join ', '
+		console.log 'Deleted files:'
+		console.log path for path in paths
 	.catch (error) ->
 		console.log 'ERROR! Could not generate documents'
 		console.log error

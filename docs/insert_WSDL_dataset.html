@@ -33,15 +33,15 @@
               
                 
                 <li>
-                  <a class="source" href="DB.html">
-                    DB.coffee
+                  <a class="source" href="remedyWS.html">
+                    remedyWS.coffee
                   </a>
                 </li>
               
                 
                 <li>
-                  <a class="source" href="adapter.html">
-                    adapter.coffee
+                  <a class="source" href="DB.html">
+                    DB.coffee
                   </a>
                 </li>
               
@@ -68,22 +68,22 @@
               
                 
                 <li>
-                  <a class="source" href="get_all.html">
-                    get_all.coffee
+                  <a class="source" href="get_all_views.html">
+                    get_all_views.coffee
                   </a>
                 </li>
               
                 
                 <li>
-                  <a class="source" href="get_one_dataset.html">
-                    get_one_dataset.coffee
+                  <a class="source" href="get_one_view.html">
+                    get_one_view.coffee
                   </a>
                 </li>
               
                 
                 <li>
-                  <a class="source" href="post_one_dataset.html">
-                    post_one_dataset.coffee
+                  <a class="source" href="post_one_view.html">
+                    post_one_view.coffee
                   </a>
                 </li>
               
@@ -138,8 +138,8 @@
               
                 
                 <li>
-                  <a class="source" href="post_one_ws_action.html">
-                    post_one_ws_action.coffee
+                  <a class="source" href="insert_WSDL_dataset.html">
+                    insert_WSDL_dataset.coffee
                   </a>
                 </li>
               
@@ -197,8 +197,7 @@ In addition, this also instantiates the database</p>
 soap = <span class="hljs-built_in">require</span> <span class="hljs-string">'soap'</span>
 globby = <span class="hljs-built_in">require</span> <span class="hljs-string">'globby'</span>
 Promise = <span class="hljs-built_in">require</span> <span class="hljs-string">'bluebird'</span>
-{resolve, sep} = <span class="hljs-built_in">require</span> <span class="hljs-string">'path'</span>
-db = <span class="hljs-keyword">new</span> <span class="hljs-built_in">require</span> resolve process.cwd(), <span class="hljs-string">'DB'</span>, <span class="hljs-string">'DB.coffee'</span></pre></div>
+{resolve, sep} = <span class="hljs-built_in">require</span> <span class="hljs-string">'path'</span></pre></div>
         
       
         
@@ -299,7 +298,7 @@ blacklist = [<span class="hljs-string">'targetnamespace'</span>, <span class="hl
         
       
         
-        <p><strong>Input</strong>: the WSDL file location</p>
+        <p><strong>Input</strong>: the SOAP client object, the action name, the input dataset, and the database record</p>
 
         
       
@@ -312,7 +311,7 @@ blacklist = [<span class="hljs-string">'targetnamespace'</span>, <span class="hl
 
         
           <div class='highlight'><pre><span class="hljs-function">
-<span class="hljs-title">promisedResults</span> = <span class="hljs-params">(client, record)</span> -&gt;</span>
+<span class="hljs-title">promisedResults</span> = <span class="hljs-params">(client, act, dataset, record)</span> -&gt;</span>
 	<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Testing the input data...'</span>
 	<span class="hljs-keyword">new</span> Promise (resolve, reject) -&gt;
 		client.addSoapHeader JSON.parse record.credentials <span class="hljs-keyword">if</span> record.credentials?
@@ -332,7 +331,7 @@ blacklist = [<span class="hljs-string">'targetnamespace'</span>, <span class="hl
         
       
         
-        <p><strong>Input</strong>: a RESTify request object, an object with the results of the test call</p>
+        <p><strong>Input</strong>: a RESTify request object, the collection, the database record, the dataset, an object with the results of the test call</p>
 
         
       
@@ -345,9 +344,9 @@ blacklist = [<span class="hljs-string">'targetnamespace'</span>, <span class="hl
 
         
           <div class='highlight'><pre><span class="hljs-function">
-<span class="hljs-title">updateDatabase</span> = <span class="hljs-params">(rs, results)</span> -&gt;</span>
+<span class="hljs-title">updateDatabase</span> = <span class="hljs-params">(rs, wsdlFiles, record, dataset, results)</span> -&gt;</span>
 	<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Inserting data into database...'</span>
-	rs.write JSON.stringify result <span class="hljs-keyword">for</span> result <span class="hljs-keyword">in</span> results
+	rs.write JSON.stringify results[item] <span class="hljs-keyword">for</span> item <span class="hljs-keyword">of</span> results
 	record.datasets ?= []
 	record.datasets.push dataset
 	wsdlFiles.update record
@@ -429,8 +428,8 @@ blacklist = [<span class="hljs-string">'targetnamespace'</span>, <span class="hl
 		<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Preparing the path to the WSDL file...'</span>
 		Promise.resolve globby <span class="hljs-string">"wsdl<span class="hljs-subst">#{sep}</span><span class="hljs-subst">#{ws}</span>*"</span>
 	.<span class="hljs-keyword">then</span> (wsdlPath) -&gt; promisedSOAP wsdlPath[<span class="hljs-number">0</span>]
-	.<span class="hljs-keyword">then</span> (client) -&gt; promisedResults client, record
-	.<span class="hljs-keyword">then</span> (results) -&gt; updateDatabase rs, results
+	.<span class="hljs-keyword">then</span> (client) -&gt; promisedResults client, act, dataset, record
+	.<span class="hljs-keyword">then</span> (results) -&gt; updateDatabase rs, wsdlFiles, record, dataset, results
 	.<span class="hljs-keyword">catch</span> (error) -&gt; errorCatcher rs, error
 	.<span class="hljs-keyword">finally</span> -&gt; finalFunction rs, nx</pre></div>
         

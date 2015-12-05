@@ -82,8 +82,8 @@
               
                 
                 <li>
-                  <a class="source" href="post_one_dataset.html">
-                    post_one_dataset.coffee
+                  <a class="source" href="post_one_view.html">
+                    post_one_view.coffee
                   </a>
                 </li>
               
@@ -203,12 +203,12 @@ Promise = <span class="hljs-built_in">require</span> <span class="hljs-string">'
         
       
         
-        <p>This function returns a promise that will either resolve to nothing, or reject into an error message.</p>
+        <p>This function returns a promise that will either resolve to a dynamic view, or reject into an error message.</p>
 
         
       
         
-        <p><strong>Input</strong>: a Loki dynamic view, the filter that was user-supplied</p>
+        <p><strong>Input</strong>: a Loki dataset, name of the dynamic view, the filter that was user-supplied</p>
 
         
       
@@ -221,14 +221,17 @@ Promise = <span class="hljs-built_in">require</span> <span class="hljs-string">'
 
         
           <div class='highlight'><pre><span class="hljs-function">
-<span class="hljs-title">promisedChecks</span> = <span class="hljs-params">(dyn, filter)</span> -&gt;</span>
+<span class="hljs-title">promisedChecks</span> = <span class="hljs-params">(datasets, name, filter)</span> -&gt;</span>
 	<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Performing initial checks...'</span>
 	<span class="hljs-keyword">new</span> Promise (resolve, reject) -&gt;
+		reject <span class="hljs-string">'Filter already exists'</span> <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> datasets.getDynamicView name
+		dyn = datasets.addDynamicView name
+
 		reject <span class="hljs-string">'No filter submitted'</span> <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> Object.isObject filter
-		resolve() <span class="hljs-keyword">if</span> Object.equal [], dyn.filterPipeline
+		resolve dyn <span class="hljs-keyword">if</span> Object.equal [], dyn.filterPipeline
 		<span class="hljs-keyword">for</span> item <span class="hljs-keyword">in</span> dyn.filterPipeline
 			reject <span class="hljs-string">'Filter already registered'</span> <span class="hljs-keyword">if</span> filter.equals item.val
-			resolve() <span class="hljs-keyword">if</span> item <span class="hljs-keyword">is</span> dyn.filterPipeline.last()</pre></div>
+			resolve dyn <span class="hljs-keyword">if</span> item <span class="hljs-keyword">is</span> dyn.filterPipeline.last()</pre></div>
         
       
         
@@ -311,12 +314,10 @@ Promise = <span class="hljs-built_in">require</span> <span class="hljs-string">'
 
 	{name} = rq.params
 	filter = Object.extended dotize.convert Object.reject rq.params, <span class="hljs-string">'name'</span>
-	
 	datasets = db.getCollection <span class="hljs-string">'datasets'</span>
-	dyn = (datasets.getDynamicView name) <span class="hljs-keyword">or</span> (datasets.addDynamicView name)
 
-	promisedChecks dyn, filter
-	.<span class="hljs-keyword">then</span> -&gt; applyFilter dyn, db, filter, rs
+	promisedChecks datasets, name, filter
+	.<span class="hljs-keyword">then</span> (dyn) -&gt; applyFilter dyn, db, filter, rs
 	.<span class="hljs-keyword">catch</span> (error) -&gt; errorCatcher rs, error
 	.<span class="hljs-keyword">finally</span> -&gt; finalFunction rs, nx</pre></div>
         

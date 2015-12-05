@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>timer.coffee</title>
+  <title>Database Class</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
   <link rel="stylesheet" media="all" href="docco.css" />
@@ -13,7 +13,10 @@
 
       <div class="header">
         
-          <h1>timer.coffee</h1>
+          
+          <h1 id="database-class">Database Class</h1>
+
+          
         
 
         
@@ -175,27 +178,114 @@
 
       
         
-        <p>Parse the arguments passed</p>
+        <p>This class is designed to quickly initialize the in-memory database. The database will be populated by the collections it is preset to have and will smartly save and load the database to ensure all instances of this DB are in sync.</p>
 
-        
-          <div class='highlight'><pre>args = process.argv
-node = args.shift()
-coffeeTimer = args.shift()</pre></div>
         
       
         
-        <p>Function to trigger to stdout</p>
+        <h2 id="requiring-dependencies">Requiring Dependencies</h2>
 
-        
-          <div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">triggerOut</span> = -&gt;</span> <span class="hljs-built_in">console</span>.log <span class="hljs-string">'Trigger'</span></pre></div>
         
       
         
-        <p>Execute the timer</p>
+        <p>Require the modules we need for this class.</p>
 
         
-          <div class='highlight'><pre>triggerOut()
-setInterval triggerOut, args[<span class="hljs-number">0</span>]</pre></div>
+          <div class='highlight'><pre>
+<span class="hljs-built_in">require</span> <span class="hljs-string">'sugar'</span>
+loki = <span class="hljs-built_in">require</span> <span class="hljs-string">'lokijs'</span></pre></div>
+        
+      
+        
+        <h2 id="constructor">Constructor</h2>
+<p>On instantiation, create the database connection with a periodic saving and loading interval, and create the collections if they do not exist yet.</p>
+
+        
+      
+        
+        <p>This periodic saving and loading ensures that the created instance is always up to date. We need this because all the routes need to be in sync. Otherwise, changes do not propagate between instances.</p>
+
+        
+          <div class='highlight'><pre>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">DB</span></span>
+
+	<span class="hljs-attribute">constructor</span>: <span class="hljs-function">-&gt;</span>
+		_db = <span class="hljs-keyword">new</span> loki <span class="hljs-string">'db/loki.db'</span>,
+			<span class="hljs-attribute">autosave</span>: <span class="hljs-literal">true</span>
+			<span class="hljs-attribute">autosaveInterval</span>: <span class="hljs-property">@_saveInterval</span>
+		(<span class="hljs-function">-&gt;</span>
+			_db.loadDatabase()
+			<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Refreshing database...'</span>
+		).every <span class="hljs-property">@_loadInterval</span>
+		<span class="hljs-property">@_db</span> = _db
+		<span class="hljs-property">@_init</span>()</pre></div>
+        
+      
+        
+        <h2 id="static-properties">Static Properties</h2>
+<p><strong>_db</strong>: This stores the Loki database</p>
+
+        
+      
+        
+        <p><strong>_saveInterval</strong>: This configures the save interval of the database</p>
+
+        
+      
+        
+        <p><strong>_loadInterval</strong>: This configures the reload interval of the database</p>
+
+        
+          <div class='highlight'><pre>
+	<span class="hljs-attribute">_db</span>: {}
+	<span class="hljs-attribute">_saveInterval</span>: <span class="hljs-number">1000</span>
+	<span class="hljs-attribute">_loadInterval</span>: <span class="hljs-number">5000</span></pre></div>
+        
+      
+        
+        <h2 id="collection-initializer">Collection Initializer</h2>
+<p>Private initialization function that will get or create a named Loki collection.</p>
+
+        
+          <div class='highlight'><pre>
+	<span class="hljs-attribute">_initCollection</span>: <span class="hljs-function"><span class="hljs-params">(name)</span> =&gt;</span>
+		(<span class="hljs-property">@_db</span>.getCollection name) <span class="hljs-keyword">or</span> (<span class="hljs-property">@_db</span>.addCollection name)</pre></div>
+        
+      
+        
+        <h2 id="class-initializer">Class Initializer</h2>
+<p>Private initialization function that will populate the Loki database classes.</p>
+
+        
+          <div class='highlight'><pre>
+	<span class="hljs-attribute">_init</span>: <span class="hljs-function">=&gt;</span>
+		<span class="hljs-property">@_initCollection</span> collection <span class="hljs-keyword">for</span> collection <span class="hljs-keyword">in</span> [
+			<span class="hljs-string">'wsdlFiles'</span>
+			<span class="hljs-string">'datasets'</span>
+		]
+		<span class="hljs-literal">null</span></pre></div>
+        
+      
+        
+        <h2 id="get-collection-adapter">Get Collection Adapter</h2>
+<p>Adapter to the Loki getCollection function</p>
+
+        
+          <div class='highlight'><pre>
+	<span class="hljs-attribute">saveDatabase</span>: <span class="hljs-function">-&gt;</span>
+		<span class="hljs-property">@_db</span>.saveDatabase()
+
+	<span class="hljs-attribute">getCollection</span>: <span class="hljs-function"><span class="hljs-params">(name)</span> =&gt;</span>
+		<span class="hljs-property">@_db</span>.getCollection name</pre></div>
+        
+      
+        
+        <h2 id="public-api">Public API</h2>
+<p>Expose the class by exporting it</p>
+
+        
+          <div class='highlight'><pre>
+<span class="hljs-built_in">module</span>.exports = DB</pre></div>
         
       
       <div class="fleur">h</div>

@@ -75,7 +75,6 @@ $RECYCLE.BIN/
 *.lnk
 
 # Upload files and the database are not part of the code
-db
-!db/.gitkeep
-wsdl
+!wsdl
+wsdl/*
 !wsdl/.gitkeep

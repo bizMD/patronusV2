@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>timer.coffee</title>
+  <title>Get All Dynamic Views</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
   <link rel="stylesheet" media="all" href="docco.css" />
@@ -13,7 +13,10 @@
 
       <div class="header">
         
-          <h1>timer.coffee</h1>
+          
+          <h1 id="get-all-dynamic-views">Get All Dynamic Views</h1>
+
+          
         
 
         
@@ -175,27 +178,49 @@
 
       
         
-        <p>Parse the arguments passed</p>
+        <p>This route is designed to return all the dynamic views installed in the database.</p>
 
-        
-          <div class='highlight'><pre>args = process.argv
-node = args.shift()
-coffeeTimer = args.shift()</pre></div>
         
       
         
-        <p>Function to trigger to stdout</p>
+        <h2 id="requiring-dependencies">Requiring Dependencies</h2>
 
-        
-          <div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">triggerOut</span> = -&gt;</span> <span class="hljs-built_in">console</span>.log <span class="hljs-string">'Trigger'</span></pre></div>
         
       
         
-        <p>Execute the timer</p>
+        <p>Require the modules we need for this class.</p>
 
         
-          <div class='highlight'><pre>triggerOut()
-setInterval triggerOut, args[<span class="hljs-number">0</span>]</pre></div>
+          <div class='highlight'><pre>
+<span class="hljs-built_in">require</span> <span class="hljs-string">'sugar'</span></pre></div>
+        
+      
+        
+        <h2 id="route-definition">Route Definition</h2>
+
+        
+      
+        
+        <p>This will return the headers with HTTP 200 Status Code, and a JSON content type. Afterwards, it will take collection, get all the dynamic views, and return all of them.</p>
+
+        
+      
+        
+        <p>It uses SugarJS to check if there are no dynamic views, and if there are none, to return an empty array.</p>
+
+        
+          <div class='highlight'><pre><span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-params">([rq, rs, nx], db)</span> -&gt;</span>
+	rs.writeHead <span class="hljs-number">200</span>, {<span class="hljs-string">"Content-Type"</span>: <span class="hljs-string">"application/json"</span>}
+
+	<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Preparing the collection...'</span>
+	datasets = db.getCollection <span class="hljs-string">'datasets'</span>
+	
+	<span class="hljs-keyword">if</span> Object.equal datasets.DynamicViews, [] <span class="hljs-keyword">then</span> rs.write <span class="hljs-string">'[]'</span>
+	<span class="hljs-keyword">else</span> rs.write <span class="hljs-string">"{\"name\": \"<span class="hljs-subst">#{name}</span>\", \"view\": \"<span class="hljs-subst">#{filterPipeline}</span>\"}"</span> <span class="hljs-keyword">for</span> {name, filterPipeline} <span class="hljs-keyword">in</span> datasets.DynamicViews
+
+	<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Ending the reponse...'</span>
+	rs.end()
+	nx()</pre></div>
         
       
       <div class="fleur">h</div>

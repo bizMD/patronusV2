@@ -2,7 +2,7 @@
 
 <html>
 <head>
-  <title>Create New Dynamic View</title>
+  <title>Get Dynamic View</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
   <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
   <link rel="stylesheet" media="all" href="docco.css" />
@@ -14,7 +14,7 @@
       <div class="header">
         
           
-          <h1 id="create-new-dynamic-view">Create New Dynamic View</h1>
+          <h1 id="get-dynamic-view">Get Dynamic View</h1>
 
           
         
@@ -82,8 +82,8 @@
               
                 
                 <li>
-                  <a class="source" href="post_one_dataset.html">
-                    post_one_dataset.coffee
+                  <a class="source" href="post_one_view.html">
+                    post_one_view.coffee
                   </a>
                 </li>
               
@@ -178,7 +178,7 @@
 
       
         
-        <p>This route is designed to insert a new dynamic view that is properly defined.</p>
+        <p>This route is designed to return a named dynamic view</p>
 
         
       
@@ -188,12 +188,12 @@
         
       
         
-        <p>Require the modules we need for this class.</p>
+        <p>Require the modules we need for this class.
+In addition, this also instantiates the database</p>
 
         
           <div class='highlight'><pre>
 <span class="hljs-built_in">require</span> <span class="hljs-string">'sugar'</span>
-dotize = <span class="hljs-built_in">require</span> <span class="hljs-string">'dotize'</span>
 Promise = <span class="hljs-built_in">require</span> <span class="hljs-string">'bluebird'</span></pre></div>
         
       
@@ -208,50 +208,45 @@ Promise = <span class="hljs-built_in">require</span> <span class="hljs-string">'
         
       
         
-        <p><strong>Input</strong>: a Loki dynamic view, the filter that was user-supplied</p>
+        <p><strong>Input</strong>: a Loki dynamic view</p>
 
         
       
         
         <p><strong>Output</strong>:</p>
 <ol>
-<li>On success, nothing. But to pass, it must <em>not</em> find that the submitted filter already exists, and it must find the filter actually exists and was submitted.</li>
+<li>On success, nothing. But it must detect a dynamic view is present for success.</li>
 <li>On failure, the error message returned. If rejected, the promise chain will break.</li>
 </ol>
 
         
           <div class='highlight'><pre><span class="hljs-function">
-<span class="hljs-title">promisedChecks</span> = <span class="hljs-params">(dyn, filter)</span> -&gt;</span>
-	<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Performing initial checks...'</span>
+<span class="hljs-title">promisedChecks</span> = <span class="hljs-params">(dyn)</span> -&gt;</span>
 	<span class="hljs-keyword">new</span> Promise (resolve, reject) -&gt;
-		reject <span class="hljs-string">'No filter submitted'</span> <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> Object.isObject filter
-		resolve() <span class="hljs-keyword">if</span> Object.equal [], dyn.filterPipeline
-		<span class="hljs-keyword">for</span> item <span class="hljs-keyword">in</span> dyn.filterPipeline
-			reject <span class="hljs-string">'Filter already registered'</span> <span class="hljs-keyword">if</span> filter.equals item.val
-			resolve() <span class="hljs-keyword">if</span> item <span class="hljs-keyword">is</span> dyn.filterPipeline.last()</pre></div>
+		<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Performing initial checks...'</span>
+		reject <span class="hljs-string">'View now found'</span> <span class="hljs-keyword">if</span> dyn <span class="hljs-keyword">is</span> <span class="hljs-literal">null</span>
+		resolve()</pre></div>
         
       
         
-        <h2 id="apply-find">Apply Find</h2>
+        <h2 id="send-view">Send View</h2>
 
         
       
         
-        <p>This function applies the filter to the collection, creating a dynamic view. It then saves the database.</p>
+        <p>This function sends either an empty array if the dynamic view has no data yet, or it will stream the data into the response object.</p>
 
         
       
         
-        <p><strong>Input</strong>: a Loki dynamic view, a Loki database, the user submitted filter, and a RESTify response</p>
+        <p><strong>Input</strong>: a Loki dynamic view</p>
 
         
           <div class='highlight'><pre><span class="hljs-function">
-<span class="hljs-title">applyFilter</span> = <span class="hljs-params">(dyn, db, filter, rs)</span> -&gt;</span>
-	<span class="hljs-built_in">console</span>.log dyn
-	<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Registering the filter...'</span>
-	dyn.applyFind filter
-	db.saveDatabase()
-	rs.write <span class="hljs-string">'{"status": "Filter registered"}'</span></pre></div>
+<span class="hljs-title">sendView</span> = <span class="hljs-params">(rs, dyn)</span> -&gt;</span>
+	<span class="hljs-built_in">console</span>.log <span class="hljs-string">'Retrieving the data...'</span>
+	<span class="hljs-keyword">if</span> Object.equal [], dyn.data() <span class="hljs-keyword">then</span> rs.end <span class="hljs-string">'[]'</span>
+	<span class="hljs-keyword">else</span> rs.write JSON.stringify data <span class="hljs-keyword">for</span> data <span class="hljs-keyword">in</span> dyn.data()</pre></div>
         
       
         
@@ -308,15 +303,13 @@ Promise = <span class="hljs-built_in">require</span> <span class="hljs-string">'
           <div class='highlight'><pre>
 <span class="hljs-built_in">module</span>.exports = <span class="hljs-function"><span class="hljs-params">([rq, rs, nx], db)</span> -&gt;</span>
 	rs.writeHead <span class="hljs-number">200</span>, {<span class="hljs-string">"Content-Type"</span>: <span class="hljs-string">"application/json"</span>}
-
-	{name} = rq.params
-	filter = Object.extended dotize.convert Object.reject rq.params, <span class="hljs-string">'name'</span>
 	
+	{name} = rq.params
 	datasets = db.getCollection <span class="hljs-string">'datasets'</span>
-	dyn = (datasets.getDynamicView name) <span class="hljs-keyword">or</span> (datasets.addDynamicView name)
+	dyn = datasets.getDynamicView name
 
-	promisedChecks dyn, filter
-	.<span class="hljs-keyword">then</span> -&gt; applyFilter dyn, db, filter, rs
+	promisedChecks dyn
+	.<span class="hljs-keyword">then</span> -&gt; sendView rs, dyn
 	.<span class="hljs-keyword">catch</span> (error) -&gt; errorCatcher rs, error
 	.<span class="hljs-keyword">finally</span> -&gt; finalFunction rs, nx</pre></div>
         
