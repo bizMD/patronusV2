@@ -55,7 +55,7 @@ server.del '/resource/1/dataView/:name', (args...) -> routes.dataView.v1.del.del
 # This section triggers the polling process.
 # The disadvantage of this approach is we can't let two instances run
 # or else the same queries will be redundantly made to Remedy
-coffeeBin = 'node_modules/coffee-script/bin/coffee'
+coffeeBin = resolve 'node_modules', 'coffee-script', 'bin', 'coffee'
 coffeeTimer = resolve process.cwd(), 'helper', 'timer.coffee'
 pollInterval = 5000 # 5 seconds for dev mode
 
@@ -74,5 +74,5 @@ server.on 'after', (req, res, route, error) ->
 # Run the server under an active domain
 d.run ->
 	# Log when the web server starts up
-	server.listen 80, -> console.log "#{server.name}[#{process.pid}] online: #{server.url}"
+	server.listen 7777, -> console.log "#{server.name}[#{process.pid}] online: #{server.url}"
 	console.log "#{server.name} is starting..."
