@@ -43,8 +43,8 @@ promisedChecks = (datasets, name, filter) ->
 #**Input**: a Loki dynamic view, a Loki database, the user submitted filter, and a RESTify response
 
 applyFilter = (dyn, db, filter, rs) ->
-	console.log dyn
 	console.log 'Registering the filter...'
+	console.log filter
 	dyn.applyFind filter
 	db.saveDatabase()
 	rs.write '{"status": "Filter registered"}'

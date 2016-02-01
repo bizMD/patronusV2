@@ -4,6 +4,7 @@ util = require 'util'
 loki = require 'lokijs'
 domain = require 'domain'
 restify = require 'restify'
+socketio = require 'socket.io'
 {resolve} = require 'path'
 {spawn} = require 'child_process'
 
@@ -11,6 +12,7 @@ restify = require 'restify'
 requireDir = require 'require-dir'
 require('coffee-script/register')
 routes = requireDir 'routes', recurse: true
+events = requireDir 'events', recurse: true
 
 # Require the adapter
 adapter = require resolve process.cwd(), 'adapters', 'remedyWS'
@@ -20,8 +22,11 @@ d = domain.create()
 d.on 'error', (error) -> console.log error
 
 # Database
-DB = require resolve process.cwd(), 'DB', 'DB.coffee'
-db = new DB
+#DB = require resolve process.cwd(), 'DB', 'DB.coffee'
+#db = new DB
+db = new loki 'db/loki.db'
+db.addCollection 'wsdlFiles'
+db.addCollection 'datasets'
 
 # Create the web server and use middleware
 server = restify.createServer name: 'PatronusV2'
@@ -29,6 +34,28 @@ server.use restify.bodyParser()
 server.pre restify.pre.sanitizePath()
 server.use restify.CORS()
 server.use restify.fullResponse()
+
+# Enable socket.io server
+io = socketio.listen server.server
+
+# This section triggers the polling process.
+# The disadvantage of this approach is we can't let two instances run
+# or else the same queries will be redundantly made to Remedy
+coffeeBin = resolve 'node_modules', 'coffee-script', 'bin', 'coffee'
+coffeeTimer = resolve process.cwd(), 'helper', 'timer.coffee'
+pollInterval = 5000 # 5 seconds for dev mode
+
+timer = spawn process.execPath, [coffeeBin, coffeeTimer, pollInterval], cwd: process.cwd()
+timer.on 'error', (error) -> util.log error
+timer.stderr.on 'data', (data) -> util.log data
+timer.on 'exit', -> util.log "Timer [#{timer.pid}] has shut down"
+timer.stdout.on 'data', ->
+	adapter db
+	.then ->
+		Object.each io.sockets.adapter.rooms, (room) ->
+			datasets = db.getCollection 'datasets'
+			dyn = datasets.getDynamicView room
+			io.to(room).emit 'new data delivery', JSON.stringify Object.reject data, 'meta', '$loki' for data in dyn.data() if !!dyn
 
 # Define REST API: wsdlCache
 # TODO: Document the API here
@@ -52,18 +79,14 @@ server.put '/resource/1/dataView/:name', (args...) -> routes.dataView.v1.put.put
 server.del '/resource/1/dataView', (args...) -> routes.dataView.v1.del.delete_all args, db
 server.del '/resource/1/dataView/:name', (args...) -> routes.dataView.v1.del.delete_one_dataset args, db
 
-# This section triggers the polling process.
-# The disadvantage of this approach is we can't let two instances run
-# or else the same queries will be redundantly made to Remedy
-coffeeBin = resolve 'node_modules', 'coffee-script', 'bin', 'coffee'
-coffeeTimer = resolve process.cwd(), 'helper', 'timer.coffee'
-pollInterval = 5000 # 5 seconds for dev mode
+# Define database events
+#wsdlFiles.on 'insert', (record) -> events.v1.push_db_update record, io
+#datasets.on 'insert', (record) -> events.v1.push_db_update record, io
 
-timer = spawn process.execPath, [coffeeBin, coffeeTimer, pollInterval], cwd: process.cwd()
-timer.on 'error', (error) -> util.log error
-timer.stdout.on 'data', -> adapter pollInterval, db
-timer.stderr.on 'data', (data) -> util.log data
-timer.on 'exit', -> util.log "Timer [#{timer.pid}] has shut down"
+# Define web socket events
+io.sockets.on 'connection', (socket) ->
+	socket.on 'subscribe to filter', (filter) -> socket.join filter
+
 
 # After each operation, log if there was an error
 server.on 'after', (req, res, route, error) ->

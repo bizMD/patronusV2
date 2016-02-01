@@ -142,7 +142,6 @@ finalFunction = (rs, nx) ->
 
 module.exports = ([rq, rs, nx], db) ->
 	rs.writeHead 200, {"Content-Type": "application/json"}
-
 	{ws, act} = rq.params
 	dataset = Object.reject rq.params, 'ws', 'act'
 	wsdlFiles = db.getCollection 'wsdlFiles'

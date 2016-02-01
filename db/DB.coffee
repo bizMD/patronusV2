@@ -45,6 +45,7 @@ class DB
 	#
 
 	_db: {}
+	_collections: ['wsdlFiles','datasets']
 	_saveInterval: 1000
 	_loadInterval: 5000
 
@@ -64,10 +65,7 @@ class DB
 	#
 
 	_init: =>
-		@_initCollection collection for collection in [
-			'wsdlFiles'
-			'datasets'
-		]
+		@_initCollection collection for collection in @_collections
 		null
 
 	#
