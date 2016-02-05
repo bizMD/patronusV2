@@ -34,8 +34,7 @@ module.exports = (db) ->
 	new Promise (done, reject) ->
 
 		# Grab all the records with datasets
-		records = wsdlFiles.where whereFunction
-		net = for record in records
+		net = for record in wsdlFiles.where whereFunction
 			console.log 'Found record with dataset attribute'
 			console.log record
 			# Grab all the datasets in those records

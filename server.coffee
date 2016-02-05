@@ -1,3 +1,6 @@
+# Allow self signed certificates
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
+
 # Require the dependencies
 require 'sugar'
 util = require 'util'
